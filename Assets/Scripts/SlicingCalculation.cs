@@ -8,21 +8,60 @@ namespace Assets.Scripts{
 
 			if (adjacency == null)
 				adjacency = GenerateAdjancy(mesh);
+
 			Triangle[] triangle = GetTriangles(mesh);
 
+
+			//Sorting vertices
 			List<Vector3> vAbove = new List<Vector3>(); 
 			List<Vector3> vBelow = new List<Vector3>();
 
 			for (int i = 0; i < mesh.vertices.Length; i++){
-				Vector3 vert = mesh.vertices[i];
-				if(IsAbove(vert,point,rot))
-					vAbove.Add(vert);
+				Vector3 v = mesh.vertices[i];
+				if(IsVertAbove(v,point,rot))
+					vAbove.Add(v);
 				else
-					vBelow.Add(vert);
-
+					vBelow.Add(v);
 			}
 
+
+			List<Triangle> tAbove = new List<Triangle>();
+			List<Triangle> tBelow = new List<Triangle>();
+			List<Triangle> tIntersection = new List<Triangle>();
+
+			for (int i = 0; i < triangle.Length; i++){
+				Triangle t =triangle[i];
+				if(IsTriangleAbove(t,point,rot))
+					tAbove.Add(t);
+				else if(IsTriangleBelow(t,point,rot))
+					tBelow.Add(t);
+				else
+					tIntersection.Add(t);
+			}
+
+
 			 throw new NotImplementedException();
+		}
+
+		private bool IsTriangleAbove(Triangle triangle, Vector3 pos, Quaternion rot){
+
+			Vector3 A = triangle.Vertices[triangle.A];
+			Vector3 B = triangle.Vertices[triangle.A];
+			Vector3 C = triangle.Vertices[triangle.A];
+
+			return IsVertAbove(A, pos, rot)
+			       && IsVertAbove(B, pos, rot)
+			       && IsVertAbove(C, pos, rot);
+		}
+		private bool IsTriangleBelow(Triangle triangle, Vector3 pos, Quaternion rot){
+
+			Vector3 A = triangle.Vertices[triangle.A];
+			Vector3 B = triangle.Vertices[triangle.A];
+			Vector3 C = triangle.Vertices[triangle.A];
+
+			return !IsVertAbove(A, pos, rot)
+			       && !IsVertAbove(B, pos, rot)
+			       && !IsVertAbove(C, pos, rot);
 		}
 
 		private static Triangle[] GetTriangles(Mesh mesh){
@@ -31,15 +70,15 @@ namespace Assets.Scripts{
 				int a = mesh.triangles[(i * 3)];
 				int b = mesh.triangles[(i * 3) + 1];
 				int c = mesh.triangles[(i * 3) + 2];
-				triangle[i] = new Triangle(a, b, c);
+				triangle[i] = new Triangle(a, b, c,mesh.vertices);
 			}
 
 			return triangle;
 		}
 
-		private bool IsAbove(Vector3 vert, Vector3 point, Quaternion rot){
+		private bool IsVertAbove(Vector3 point, Vector3 pos, Quaternion rot){
 
-			 Vector3 p = rot * (vert - point) + point;
+			 Vector3 p = rot * (point - pos) + pos;
 			return p.y > 0;
 		}
 
