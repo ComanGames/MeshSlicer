@@ -4,13 +4,18 @@ using UnityEngine;
 
 namespace Assets.Scripts{
 	public class SlicingCalculation{
+		private Mesh mesh;
 
-		public Mesh[] Slice(Mesh mesh, Vector3 point, Quaternion rot,bool[,] adjacency = null){
+		public SlicingCalculation(Mesh mesh){
+			this.mesh = mesh;
+		}
+
+		public Mesh[] Slice( Vector3 point, Quaternion rot,bool[,] adjacency = null){
 
 			if (adjacency == null)
-				adjacency = GenerateAdjancy(mesh);
+				adjacency = GenerateAdjancy();
 
-			Triangle[] triangle = GetTriangles(mesh);
+			Triangle[] triangle = GetTriangles();
 
 
 			//Sorting vertices
@@ -45,21 +50,22 @@ namespace Assets.Scripts{
 			 throw new NotImplementedException();
 		}
 
-		public Vector3[] GetCutVertices(Mesh mesh, Vector3 point, Quaternion rot, bool[,] adjacency = null){
+		public Vector3[] GetCutVertices(Vector3 point, Quaternion rot, bool[,] adjacency = null){
 
 			if (adjacency == null)
-				adjacency = GenerateAdjancy(mesh);
+				adjacency = GenerateAdjancy();
 
-			Triangle[] triangle = GetTriangles(mesh);
+			Triangle[] triangle = GetTriangles();
 
 			List<Triangle> tIntersection = new List<Triangle>();
 
 			for (int i = 0; i < triangle.Length; i++)
 			{
 				Triangle t = triangle[i];
-				if (!IsTriangleAbove(t, point, rot)&&IsTriangleBelow(t,point,rot))
+				if (!IsTriangleAbove(t, point, rot)&&!IsTriangleBelow(t,point,rot))
 					tIntersection.Add(t);
 			}
+			Debug.Log(tIntersection.Count);
 
 			List<Vector3> edge = new List<Vector3>();
 			LinkedList<Triangle> intersectionLinkedList = NewMethod(tIntersection);
@@ -73,14 +79,15 @@ namespace Assets.Scripts{
 			LinkedList<Triangle> outlineLinked = new LinkedList<Triangle>();
 			outlineLinked.AddFirst(input[0]);
 			//We just add one more Item
+			Debug.Log(input.Count);
+			LinkedListNode<Triangle> current = null;
 			for (int i = 1; i < input.Count; i++){
 				if (input[i].HaveSameEdge(input[0]) && !input[i].Equals(input[0])){
-					outlineLinked.AddAfter(outlineLinked.First, input[i]);
+					current= outlineLinked.AddAfter(outlineLinked.First, input[i]);
+					Debug.Log("We are hear");
 					break;
 				}
 			}
-
-			LinkedListNode<Triangle> current = outlineLinked.First.Next;
 
 			for (int i = 0; i < input.Count; i++){
 				if (!input[i].Equals(current.Value)
@@ -97,8 +104,8 @@ namespace Assets.Scripts{
 
 		private bool IsTriangleAbove(Triangle triangle, Vector3 pos, Quaternion rot){
 			Vector3 A = triangle.Vertices[triangle.A];
-			Vector3 B = triangle.Vertices[triangle.A];
-			Vector3 C = triangle.Vertices[triangle.A];
+			Vector3 B = triangle.Vertices[triangle.B];
+			Vector3 C = triangle.Vertices[triangle.C];
 
 			return IsVertAbove(A, pos, rot)
 			       && IsVertAbove(B, pos, rot)
@@ -107,15 +114,15 @@ namespace Assets.Scripts{
 		private bool IsTriangleBelow(Triangle triangle, Vector3 pos, Quaternion rot){
 
 			Vector3 A = triangle.Vertices[triangle.A];
-			Vector3 B = triangle.Vertices[triangle.A];
-			Vector3 C = triangle.Vertices[triangle.A];
+			Vector3 B = triangle.Vertices[triangle.B];
+			Vector3 C = triangle.Vertices[triangle.C];
 
 			return !IsVertAbove(A, pos, rot)
 			       && !IsVertAbove(B, pos, rot)
 			       && !IsVertAbove(C, pos, rot);
 		}
 
-		private static Triangle[] GetTriangles(Mesh mesh){
+		private Triangle[] GetTriangles(){
 			Triangle[] triangle = new Triangle[mesh.triangles.Length / 3];
 			for (int i = 0; i < triangle.Length; i++){
 				int a = mesh.triangles[(i * 3)];
@@ -133,7 +140,7 @@ namespace Assets.Scripts{
 			return p.y > 0;
 		}
 
-		private bool[,] GenerateAdjancy(Mesh mesh){
+		private bool[,] GenerateAdjancy(){
 			int m = mesh.vertices.Length;
 			bool[,] P = new bool[m,m];
 			for (int i = 0; i < mesh.triangles.Length; i+=3){
