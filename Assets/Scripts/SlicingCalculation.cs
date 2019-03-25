@@ -39,8 +39,31 @@ namespace Assets.Scripts{
 					tIntersection.Add(t);
 			}
 
+			Mesh result = new Mesh();
 
 			 throw new NotImplementedException();
+		}
+
+		public Vector3[] GetCutVertices(Mesh mesh, Vector3 point, Quaternion rot, bool[,] adjacency = null){
+
+			if (adjacency == null)
+				adjacency = GenerateAdjancy(mesh);
+
+			Triangle[] triangle = GetTriangles(mesh);
+
+			List<Triangle> tIntersection = new List<Triangle>();
+
+			for (int i = 0; i < triangle.Length; i++)
+			{
+				Triangle t = triangle[i];
+				if (!IsTriangleAbove(t, point, rot)&&IsTriangleBelow(t,point,rot))
+					tIntersection.Add(t);
+			}
+
+			List<Vector3> edge = new List<Vector3>();
+
+			return edge.ToArray();
+
 		}
 
 		private bool IsTriangleAbove(Triangle triangle, Vector3 pos, Quaternion rot){
@@ -51,7 +74,7 @@ namespace Assets.Scripts{
 
 			return IsVertAbove(A, pos, rot)
 			       && IsVertAbove(B, pos, rot)
-			       && IsVertAbove(C, pos, rot);
+			       && IsVertAbove(C, pos, rot)
 		}
 		private bool IsTriangleBelow(Triangle triangle, Vector3 pos, Quaternion rot){
 
