@@ -15,5 +15,15 @@ namespace Assets.Scripts{
 			Vertices = vertices;
 		}
 
+		public int[] GerVertices(){
+			return new[]{A, B, C};
+		}
+
+		public bool HaveSameAge(Triangle other){
+
+		}
+
+
+
 	}
 }

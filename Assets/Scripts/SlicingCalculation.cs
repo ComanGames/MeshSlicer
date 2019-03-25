@@ -61,20 +61,32 @@ namespace Assets.Scripts{
 			}
 
 			List<Vector3> edge = new List<Vector3>();
+			LinkedList<Triangle> intersectionLinkedList = NewMethod(tIntersection);
+
 
 			return edge.ToArray();
 
 		}
 
-		private bool IsTriangleAbove(Triangle triangle, Vector3 pos, Quaternion rot){
+		private static LinkedList<Triangle> NewMethod(List<Triangle> tIntersection){
+			LinkedList<Triangle> intersectionLinkedList = new LinkedList<Triangle>();
+			intersectionLinkedList.First.Value = tIntersection[0];
+	
+			for (int i = 0; i < tIntersection.Count; i++){
 
+			}
+
+			return intersectionLinkedList;
+		}
+
+		private bool IsTriangleAbove(Triangle triangle, Vector3 pos, Quaternion rot){
 			Vector3 A = triangle.Vertices[triangle.A];
 			Vector3 B = triangle.Vertices[triangle.A];
 			Vector3 C = triangle.Vertices[triangle.A];
 
 			return IsVertAbove(A, pos, rot)
 			       && IsVertAbove(B, pos, rot)
-			       && IsVertAbove(C, pos, rot)
+			       && IsVertAbove(C, pos, rot);
 		}
 		private bool IsTriangleBelow(Triangle triangle, Vector3 pos, Quaternion rot){
 
