@@ -68,15 +68,30 @@ namespace Assets.Scripts{
 
 		}
 
-		private static LinkedList<Triangle> NewMethod(List<Triangle> tIntersection){
-			LinkedList<Triangle> intersectionLinkedList = new LinkedList<Triangle>();
-			intersectionLinkedList.First.Value = tIntersection[0];
-	
-			for (int i = 0; i < tIntersection.Count; i++){
+		private static LinkedList<Triangle> NewMethod(List<Triangle> input){
+			LinkedList<Triangle> outlineLinked = new LinkedList<Triangle>();
+			outlineLinked.AddFirst(input[0]);
+			//We just add one more Item
+			for (int i = 1; i < input.Count; i++){
+				if (input[i].HaveSameEdge(input[0]) && !input[i].Equals(input[0])){
+					outlineLinked.AddAfter(outlineLinked.First, input[i]);
+					break;
+				}
+			}
+
+			LinkedListNode<Triangle> current = outlineLinked.First.Next;
+
+			for (int i = 0; i < input.Count; i++){
+				if (!input[i].Equals(current.Value)
+				    && !input.Equals(current.Previous.Value) 
+				    && input[i].HaveSameEdge(current.Value))
+				{
+					current= outlineLinked.AddAfter(current, input[i]);
+				}
 
 			}
 
-			return intersectionLinkedList;
+			return outlineLinked;
 		}
 
 		private bool IsTriangleAbove(Triangle triangle, Vector3 pos, Quaternion rot){
