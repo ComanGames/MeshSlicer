@@ -50,38 +50,46 @@ namespace Assets.Scripts{
 			 throw new NotImplementedException();
 		}
 
-		public Vector3[] GetCutVertices(Vector3 point, Quaternion rot, bool[,] adjacency = null){
+		public Vector3[] GetMashCutVertices(Vector3 point, Quaternion rot, bool[,] adjacency = null){
 
 			if (adjacency == null)
 				adjacency = GenerateAdjancy();
 
 			Triangle[] triangle = GetTriangles();
 
-			List<Triangle> tIntersection = new List<Triangle>();
-
-			for (int i = 0; i < triangle.Length; i++)
-			{
-				Triangle t = triangle[i];
-				if (!IsTriangleAbove(t, point, rot)&&!IsTriangleBelow(t,point,rot))
-					tIntersection.Add(t);
-			}
-			Debug.Log(tIntersection.Count);
+			var tIntersection = IntersectedTriangles(point, rot, triangle);
 
 			List<Vector3> dots = new List<Vector3>();
 
 			Vector3[] v = mesh.vertices;
 			foreach (Triangle t in tIntersection){
-				Vector3 d = (v[t.A] + v[t.B] + v[t.C])/3f;
-				for (int i = 0; i < t.Edges.Length; i++){
-					Vector3 intersectionPoint;
-					if (IsEdgeIntsected(t.Edges[i], point, rot, out intersectionPoint))
-						dots.Add(intersectionPoint);
-
-
-				}
+				dots.AddRange(GetTriangleCutVertices(point, rot, t));
 			}
 
 			return dots.ToArray();
+		}
+
+		private Vector3[] GetTriangleCutVertices(Vector3 point, Quaternion rot, Triangle t){
+			List<Vector3> dots = new List<Vector3>();
+			for (int i = 0; i < t.Edges.Length; i++){
+				Vector3 intersectionPoint;
+				if (IsEdgeIntsected(t.Edges[i], point, rot, out intersectionPoint))
+					dots.Add(intersectionPoint);
+			}
+
+			return dots.ToArray();
+		}
+
+		private List<Triangle> IntersectedTriangles(Vector3 point, Quaternion rot, Triangle[] triangle){
+			List<Triangle> tIntersection = new List<Triangle>();
+
+			for (int i = 0; i < triangle.Length; i++){
+				Triangle t = triangle[i];
+				if (!IsTriangleAbove(t, point, rot) && !IsTriangleBelow(t, point, rot))
+					tIntersection.Add(t);
+			}
+
+			return tIntersection;
 		}
 
 		private bool IsEdgeIntsected(Edge edge, Vector3 pos, Quaternion rot, out Vector3 intersectionPoint){
