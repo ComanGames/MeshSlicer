@@ -1,24 +1,30 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using Assets.Scripts;
+﻿using Assets.Scripts;
 using UnityEngine;
 
 [RequireComponent(typeof(Mesh))]
 public class SlicerDebug : MonoBehaviour{
 
+	public Mesh mesh;
 	public Vector3 Angle;
+	public Vector3 Pos;
 
 	private void OnDrawGizmosSelected()
 	{
-		Mesh mesh = (GetComponent<MeshFilter>()).mesh;
 		
 		SlicingCalculation slice = new SlicingCalculation(mesh);
-		Vector3[] vertices = slice.GetMashCutVertices(Vector3.up,Quaternion.Euler(Angle));
-		Debug.Log(vertices.Length);
+		Vector3[] vertices = slice.GetMashCutVertices(Pos,Quaternion.Euler(Angle));
 		for (int i = 0; i < vertices.Length; i++){
 			Gizmos.DrawSphere(vertices[i]+transform.position,0.01f);
 		}
-		Gizmos.DrawWireMesh(slice.Slice(Vector3.up,Quaternion.Euler(Angle))[0]);
+
+
+		Mesh testMesh = slice.Slice(Pos,Quaternion.Euler(Angle))[0];
+		foreach (Vector3 v in testMesh.vertices){
+			Gizmos.DrawCube(v,Vector3.one*0.01f);
+		}
+
+		GetComponent<MeshFilter>().mesh = testMesh;
+
 
 
 	}

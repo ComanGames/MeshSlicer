@@ -19,7 +19,7 @@ namespace Assets.Scripts{
 			Edges[2] = new Edge(A,C);
 		}
 
-		public int[] GerVertices(){
+		public int[] GetVertices(){
 			return new[]{A, B, C};
 		}
 		public bool Equals(Triangle other){
