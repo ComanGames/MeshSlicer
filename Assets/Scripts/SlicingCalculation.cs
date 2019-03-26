@@ -68,21 +68,46 @@ namespace Assets.Scripts{
 			Debug.Log(tIntersection.Count);
 
 			List<Vector3> dots = new List<Vector3>();
-			
 
-
-			//Get First Vetices
-//				= GetDotFromEdge(tLinked, tLinked.First.Value, tLinked.Last.Value);
-//			edge.Add(dot);
 			Vector3[] v = mesh.vertices;
 			foreach (Triangle t in tIntersection){
 				Vector3 d = (v[t.A] + v[t.B] + v[t.C])/3f;
-				dots.Add(d);
+				for (int i = 0; i < t.Edges.Length; i++){
+					Vector3 intersectionPoint;
+					if (IsEdgeIntsected(t.Edges[i], point, rot, out intersectionPoint))
+						dots.Add(intersectionPoint);
+
+
+				}
 			}
 
-			
-
 			return dots.ToArray();
+		}
+
+		private bool IsEdgeIntsected(Edge edge, Vector3 pos, Quaternion rot, out Vector3 intersectionPoint){
+			Vector3 A = rot * (mesh.vertices[edge.VerticeA] - pos) + pos; 
+			Vector3 B = rot * (mesh.vertices[edge.VerticeB] - pos) + pos;
+
+			bool AB = A.y >= 0 && B.y <= 0;
+			bool BA = B.y >= 0 && A.y <= 0;
+			intersectionPoint = default;
+			if (AB||BA){
+				float newXStep = ((B.x - A.x) / (B.y - A.y));
+				float newX =((-1*A.y)*newXStep) +A.x;
+
+				float newZStep = ((B.z - A.z) / (B.y - A.y));
+				float newZ =((-1*A.y)*newZStep) +A.z;
+				Vector3 p =new Vector3(newX,0,newZ);
+
+				intersectionPoint = p;
+				intersectionPoint = Quaternion.Inverse(rot)*(new Vector3(newX,0,newZ)-pos) + pos;
+
+				return true;
+
+
+			}
+
+			return false;
 		}
 
 
