@@ -18,7 +18,7 @@ public class SlicerDebug : MonoBehaviour{
 		}
 
 
-		Mesh testMesh = slice.Slice(Pos,Quaternion.Euler(Angle))[0];
+		Mesh testMesh = slice.Slice(Pos,Quaternion.Euler(Angle))[1];
 		foreach (Vector3 v in testMesh.vertices){
 			Gizmos.DrawCube(v,Vector3.one*0.01f);
 		}

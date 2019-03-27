@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using UnityEngine;
 using Quaternion = UnityEngine.Quaternion;
 using Vector3 = UnityEngine.Vector3;
@@ -52,25 +54,25 @@ namespace Assets.Scripts{
 
 				vAbove.AddRange(newVertices);
 
-				int[] verticesAbove = GetVerticesAbove(tr,sorted);
+				vBelow.AddRange(newVertices);
+				int aboveCount = vAbove.Count;
+				int belowCount = vBelow.Count;
+
+				int[] newTU = GetNewTrianglesUp(tr,sorted);
+				int[] newTD = GetReverse(newTU);
 				if (tUp){
-					tAbove.Add(verticesAbove[0]);
-					tAbove.Add(vAbove.Count-1);
-					tAbove.Add(vAbove.Count - 2);
+					tAbove.AddRange(GetUpTriangles(newTU, aboveCount));
+					tBelow.AddRange(GetDownTriangles(newTD, belowCount));
 				}
 				else{
-					tAbove.Add(vAbove.Count-1);
-					tAbove.AddRange(verticesAbove);
-
-
-					tAbove.Add(verticesAbove[0]);
-					tAbove.Add(vAbove.Count-1);
-					tAbove.Add(vAbove.Count-2);
-
+					tAbove.AddRange(GetDownTriangles(newTU, aboveCount));
+					tBelow.AddRange(GetUpTriangles(newTD, belowCount));
 				}
 
 				nAbove.Add(nAbove[00]);
 				nAbove.Add(nAbove[00]);
+				nBelow.Add(nAbove[00]);
+				nBelow.Add(nAbove[00]);
 
 
 			}
@@ -80,7 +82,75 @@ namespace Assets.Scripts{
 			mAbove.vertices = vAbove.ToArray();
 			mAbove.triangles = tAbove.ToArray();
 			mAbove.normals = nAbove.ToArray();
-			return new[]{mAbove};
+			//Mesh Above
+			Mesh mBelow = new Mesh();
+			mBelow.vertices = vBelow.ToArray();
+			mBelow.triangles = tBelow.ToArray();
+			mBelow.normals = nBelow.ToArray();
+			return new[]{mAbove,mBelow};
+		}
+
+		private int[] GetReverse(int[] newTu){
+			int[] r = new int[newTu.Length];
+			for (int i = 0; i < newTu.Length; i++){
+				r[i] = (newTu[i] + 1) * -1;
+			}
+
+			return r;
+		}
+
+
+		private  int[] GetDownTriangles(int[] newT, int aboveCount){
+			List<int> t = new List<int>();
+			int indexOfDown = 0;
+			for (int i = 0; i < newT.Length; i++){
+				if (newT[i] < 0)
+					indexOfDown = i;
+			}
+
+			switch (indexOfDown){
+				case 0:
+					t.Add(newT[1]); //B
+					t.Add(newT[2]); //C
+					t.Add(aboveCount - 2); //AB
+
+					t.Add(aboveCount - 2); //AB
+					t.Add(newT[2]);
+					t.Add(aboveCount - 1); //AC
+					break;
+				case 1:
+					t.Add(newT[2]); //C
+					t.Add(newT[0]); //A
+					t.Add(aboveCount - 2); //BC
+
+					t.Add(aboveCount - 2); //BC
+					t.Add(newT[0]); //A
+					t.Add(aboveCount - 1); //BA
+					break;
+				case 2:
+					t.Add(newT[0]); //A
+					t.Add(newT[1]); //B
+					t.Add(aboveCount - 2); //AC
+
+					t.Add(aboveCount - 2); //AC
+					t.Add(newT[1]); //B
+					t.Add(aboveCount - 1); //BC
+					break;
+			}
+
+			return t.ToArray();
+		}
+
+		private int[] GetUpTriangles(int[] newT, int aboveCount){
+			int[] triangle = new int[3];
+			foreach (int i in newT){
+				if (i >= 0)
+					triangle[0]=i;
+			}
+
+			triangle[1] = (aboveCount - 2);
+			triangle[2] = (aboveCount - 1);
+			return triangle;
 		}
 
 		private int[] GetVerticesBelow(Triangle tr, int[] sorted){
@@ -94,10 +164,9 @@ namespace Assets.Scripts{
 			return result.ToArray();
 		}
 
-		private int[] GetVerticesAbove(Triangle tr,int[]sorted){
+		private int[] GetNewTrianglesUp(Triangle tr,int[]sorted){
 			List<int> result = new List<int>();
 			foreach (int i in tr.GetVertices()){
-				if(sorted[i]>=0)
 					result.Add(sorted[i]);
 			}
 
@@ -238,10 +307,23 @@ namespace Assets.Scripts{
 
 		private Vector3[] GetTriangleCutVertices(Vector3 point, Quaternion rot, Triangle t){
 			List<Vector3> dots = new List<Vector3>();
-			for (int i = 0; i < t.Edges.Length; i++){
-				Vector3 intersectionPoint;
-				if (IsEdgeIntersected(t.Edges[i], point, rot, out intersectionPoint))
-					dots.Add(intersectionPoint);
+				Vector3 AB;
+				Vector3 BC;  
+				Vector3 AC;
+			bool IsAB = IsEdgeIntersected(t.EdgeAB, point, rot, out AB);
+			bool IsBC = IsEdgeIntersected(t.EdgeBC, point, rot, out BC);
+			bool IsAC = IsEdgeIntersected(t.EdgeAC, point, rot, out AC);
+			if (!IsAB){
+				dots.Add(AC);
+				dots.Add(BC);
+			}
+			if (!IsBC){
+				dots.Add(AB);
+				dots.Add(AC);
+			}
+			if (!IsAC){
+				dots.Add(BC);
+				dots.Add(AB);
 			}
 
 			return dots.ToArray();
@@ -281,8 +363,8 @@ namespace Assets.Scripts{
 
 
 		private Edge GetSameEdge(Triangle triangleA, Triangle triangleB){
-			Edge[] edgesA = triangleA.Edges;
-			Edge[] edgesB = triangleB.Edges;
+			Edge[] edgesA = triangleA.GetEdges();
+			Edge[] edgesB = triangleB.GetEdges();
 
 			for (int i = 0; i < edgesA.Length; i++){
 				for (int j = 0; j < edgesB.Length; j++){
