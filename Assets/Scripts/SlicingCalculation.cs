@@ -26,6 +26,8 @@ namespace Assets.Scripts{
 			Vector3[] v = mesh.vertices;
 			int[] t = mesh.triangles;
 			Vector3[] n = mesh.normals;
+			Vector2[] u = mesh.uv;
+
 			int[] sorted = SortVertices(v, pos, rot);
 
 
@@ -41,6 +43,10 @@ namespace Assets.Scripts{
 			List<Vector3> nBelow;
 			GetNormalsBelowAhdAbove(sorted, n, out nAbove, out nBelow);
 
+			List<Vector2> uAbove;
+			List<Vector2> uBelow;
+			GetUvBelowAhdAbove(sorted, u, out uAbove, out uBelow);
+
 			//Getting t in between
 			Triangle[] inBetween;
 			inBetween = GetIntersectedTriangels(triangle, sorted);
@@ -50,7 +56,10 @@ namespace Assets.Scripts{
 
 			foreach (Triangle tr in inBetween){
 				bool tUp = IsTriaangleUp(tr,sorted);
-				Vector3[] newVertices = GetTriangleCutVertices(pos, rot, tr);
+
+				Vector3[] newNormals;
+				Vector2[] newUVs;
+				Vector3[] newVertices = GetTriangleCutVertices(pos, rot, tr,out newNormals,out newUVs);
 
 				vAbove.AddRange(newVertices);
 
@@ -69,12 +78,11 @@ namespace Assets.Scripts{
 					tBelow.AddRange(GetUpTriangles(newTD, belowCount));
 				}
 
-				nAbove.Add(nAbove[00]);
-				nAbove.Add(nAbove[00]);
-				nBelow.Add(nAbove[00]);
-				nBelow.Add(nAbove[00]);
+				nAbove.AddRange(newNormals);
+				nBelow.AddRange(newNormals);
 
-
+				uAbove.AddRange(newUVs);
+				uBelow.AddRange(newUVs);
 			}
 
 			//Mesh Above
@@ -82,12 +90,26 @@ namespace Assets.Scripts{
 			mAbove.vertices = vAbove.ToArray();
 			mAbove.triangles = tAbove.ToArray();
 			mAbove.normals = nAbove.ToArray();
+			mAbove.uv = uAbove.ToArray();
 			//Mesh Above
 			Mesh mBelow = new Mesh();
 			mBelow.vertices = vBelow.ToArray();
 			mBelow.triangles = tBelow.ToArray();
 			mBelow.normals = nBelow.ToArray();
+			mBelow.uv = uBelow.ToArray();
 			return new[]{mAbove,mBelow};
+		}
+
+		private void GetUvBelowAhdAbove(int[] sorted, Vector2[] u, out List<Vector2> uAbove, out List<Vector2> uBelow){
+			uAbove = new List<Vector2>();
+			uBelow = new List<Vector2>();
+			for (int i = 0; i < sorted.Length; i++)
+			{
+				if (sorted[i] >= 0)
+					uAbove.Add(u[i]);
+				else
+					uBelow.Add(u[i]);
+			}
 		}
 
 		private int[] GetReverse(int[] newTu){
@@ -220,6 +242,7 @@ namespace Assets.Scripts{
 
 			List<Vector3> dots = new List<Vector3>();
 
+			
 			foreach (Triangle tr in inBetween){
 				dots.AddRange(GetTriangleCutVertices(pos, rot, tr));
 			}
@@ -306,30 +329,61 @@ namespace Assets.Scripts{
 		}
 
 		private Vector3[] GetTriangleCutVertices(Vector3 point, Quaternion rot, Triangle t){
+
+			Vector3[] v3;
+			Vector2[] v2;
+			return GetTriangleCutVertices(point, rot, t, out v3, out v2);
+		}
+
+		private Vector3[] GetTriangleCutVertices(Vector3 point, Quaternion rot, Triangle t,out Vector3[] normals, out Vector2[] uvs){
 			List<Vector3> dots = new List<Vector3>();
-				Vector3 AB;
-				Vector3 BC;  
-				Vector3 AC;
-			bool IsAB = IsEdgeIntersected(t.EdgeAB, point, rot, out AB);
-			bool IsBC = IsEdgeIntersected(t.EdgeBC, point, rot, out BC);
-			bool IsAC = IsEdgeIntersected(t.EdgeAC, point, rot, out AC);
+			List<Vector3> normalsL = new List<Vector3>();
+			List<Vector2> uvsL = new List<Vector2>();
+
+				Vector3 AB; Vector3 BC;  Vector3 AC;
+				Vector3 ABn; Vector3 BCn;  Vector3 ACn;
+				Vector2 ABu; Vector2 BCu;  Vector2 ACu;
+			bool IsAB = IsEdgeIntersected(t.EdgeAB, point, rot, out AB,out ABn,out ABu);
+			bool IsBC = IsEdgeIntersected(t.EdgeBC, point, rot, out BC,out BCn,out BCu);
+			bool IsAC = IsEdgeIntersected(t.EdgeAC, point, rot, out AC,out ACn,out ACu);
 			if (!IsAB){
 				dots.Add(AC);
 				dots.Add(BC);
+				
+				normalsL.Add(ACn);
+				normalsL.Add(BCn);
+
+				uvsL.Add(ACu);
+				uvsL.Add(BCu);
+
 			}
 			if (!IsBC){
 				dots.Add(AB);
 				dots.Add(AC);
+
+				normalsL.Add(ABn);
+				normalsL.Add(ACn);
+
+				uvsL.Add(ABu);
+				uvsL.Add(ACu);
 			}
 			if (!IsAC){
 				dots.Add(BC);
 				dots.Add(AB);
+
+				normalsL.Add(BCn);
+				normalsL.Add(ABn);
+
+				uvsL.Add(BCu);
+				uvsL.Add(ABu);
 			}
 
+			normals = normalsL.ToArray();
+			uvs = uvsL.ToArray();
 			return dots.ToArray();
 		}
 
-		private bool IsEdgeIntersected(Edge edge, Vector3 pos, Quaternion rot, out Vector3 intersectionPoint){
+		private bool IsEdgeIntersected(Edge edge, Vector3 pos, Quaternion rot, out Vector3 intersectionPoint, out Vector3 normal,out Vector2 uv){
 			Vector3 A = (rot * (mesh.vertices[edge.VerticeA]))+pos; 
 			Vector3 B = (rot * (mesh.vertices[edge.VerticeB]))+pos;
 
@@ -347,15 +401,27 @@ namespace Assets.Scripts{
 				intersectionPoint = p;
 				intersectionPoint = (Quaternion.Inverse(rot)*(new Vector3(newX,0,newZ)-pos));
 
+				float lerp = InverseLerp(A,B,p);
+				normal = Vector3.Lerp(mesh.normals[edge.VerticeA], mesh.normals[edge.VerticeB], lerp);
+				uv = Vector3.Lerp(mesh.uv[edge.VerticeA], mesh.uv[edge.VerticeB], lerp);
 
 				return true;
 
 
 			}
 
+			normal = default;
+			uv = default;
+
 			return false;
 		}
 
+		public static float InverseLerp(Vector3 a, Vector3 b, Vector3 value)
+		{
+			Vector3 ab = b - a;
+			Vector3 av = value - a;
+			return Vector3.Dot(av, ab) / Vector3.Dot(ab, ab);
+		}
 
 		private bool HaveSameEdge(Triangle triangleA, Triangle triangleB){
 			return GetSameEdge(triangleA,triangleB) != null;
