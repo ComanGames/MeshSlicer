@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using UnityEngine;
 using Quaternion = UnityEngine.Quaternion;
 using Vector3 = UnityEngine.Vector3;
@@ -10,14 +8,13 @@ namespace Assets.Scripts{
 	public class SlicingCalculation{
 		private Mesh mesh;
 
+		private Triangle[] triangles ;
 		public SlicingCalculation(Mesh mesh){
 			this.mesh = mesh;
+			triangles = Triangle.GetTriangles(mesh);
 		}
 
 		public Mesh[] Slice(Vector3 pos, Quaternion rot){
-
-			Triangle[] triangle = GetTriangles();
-
 
 			//Sorting vertices
 			Vector3[] v = mesh.vertices;
@@ -46,7 +43,7 @@ namespace Assets.Scripts{
 
 			//Getting t in between
 			Triangle[] inBetween;
-			inBetween = GetIntersectedTriangels(triangle, sorted);
+			inBetween = GetIntersectedTriangels(triangles, sorted);
 
 
 
@@ -99,9 +96,6 @@ namespace Assets.Scripts{
 
 		public Vector3[] GetMashCutVertices(Vector3 pos, Quaternion rot){
 
-			Triangle[] triangle = GetTriangles();
-
-
 			//Sorting vertices
 			Vector3[] v = mesh.vertices;
 			int[] t = mesh.triangles;
@@ -122,7 +116,7 @@ namespace Assets.Scripts{
 
 			//Getting t in between
 			Triangle[] inBetween;
-			inBetween = GetIntersectedTriangels(triangle, sorted);
+			inBetween = GetIntersectedTriangels(triangles, sorted);
 
 
 			List<Vector3> dots = new List<Vector3>();
@@ -392,24 +386,14 @@ namespace Assets.Scripts{
 
 			return false;
 		}
-		public static float InverseLerp(Vector3 a, Vector3 b, Vector3 value)
+		private float InverseLerp(Vector3 a, Vector3 b, Vector3 value)
 		{
 			Vector3 ab = b - a;
 			Vector3 av = value - a;
 			return Vector3.Dot(av, ab) / Vector3.Dot(ab, ab);
 		}
 
-		private Triangle[] GetTriangles(){
-			Triangle[] triangle = new Triangle[mesh.triangles.Length / 3];
-			for (int i = 0; i < triangle.Length; i++){
-				int a = mesh.triangles[(i * 3)];
-				int b = mesh.triangles[(i * 3) + 1];
-				int c = mesh.triangles[(i * 3) + 2];
-				triangle[i] = new Triangle(a, b, c);
-			}
 
-			return triangle;
-		}
 
 		private bool IsVerticesAbove(Vector3 point, Vector3 pos, Quaternion rot){
 

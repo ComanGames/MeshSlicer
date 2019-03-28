@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 namespace Assets.Scripts{
 	public class Triangle:IEquatable<Triangle>{
@@ -22,6 +23,16 @@ namespace Assets.Scripts{
 
 		public int[] GetVertices(){
 			return new[]{A, B, C};
+		}
+		public static Triangle[] GetTriangles(Mesh m){
+			Triangle[] triangles = new Triangle[m.triangles.Length / 3];
+			for (int i = 0; i < triangles.Length; i++){
+				int a = m.triangles[(i * 3)];
+				int b = m.triangles[(i * 3) + 1];
+				int c = m.triangles[(i * 3) + 2];
+				triangles[i] = new Triangle(a, b, c);
+			}
+			return triangles;
 		}
 		public Edge[] GetEdges(){
 			return new[]{EdgeAB,EdgeBC,EdgeAC};
