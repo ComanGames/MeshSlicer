@@ -12,11 +12,29 @@ namespace Assets.Scripts.Slicer{
 				newVertices[i] = mAbove.vertices[startIndex + i];
 
 			Vector3 avrage = GetAverage(newVertices);
-			List<Vector3> vertmAbove = mAbove.vertices.ToList();
-			List<Vector3> vertmBelow = mBelow.vertices.ToList();
 
-			vertmAbove.AddRange(newVertices);
-			vertmBelow.AddRange(newVertices);
+			int shift = mAbove.vertices.Length;
+			int[]newTriangles = new int[(newCount/2)*3];
+			for (int i = 0; i < newTriangles.Length/3; i++){
+				int index = i*3;
+				newTriangles[index] = shift+newCount;
+				newTriangles[index + 1] = shift + i + 1;
+				newTriangles[index + 2] = shift + i + 1;
+			}
+
+			List<Vector3> vAbove = mAbove.vertices.ToList();
+			List<Vector3> vBelow = mBelow.vertices.ToList();
+
+			vAbove.AddRange(newVertices);
+			vBelow.AddRange(newVertices);
+			vAbove.Add(avrage);
+			vBelow.Add(avrage);
+
+			List<Vector3> vAbove = mAbove.vertices.ToList();
+			List<Vector3> vBelow = mBelow.vertices.ToList();
+
+			
+
 		}
 
 		private Vector3 GetAverage(Vector3[] newVertices){
