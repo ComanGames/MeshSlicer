@@ -6,70 +6,48 @@ using Vector3 = UnityEngine.Vector3;
 
 namespace Assets.Scripts{
 	public class SlicingCalculation{
-		private Mesh mesh;
+		private readonly Mesh _mesh;
+		private readonly Triangle[] _triangles ;
 
-		private Triangle[] triangles ;
 		public SlicingCalculation(Mesh mesh){
-			this.mesh = mesh;
-			triangles = Triangle.GetTriangles(mesh);
+			_mesh = mesh;
+			_triangles = Triangle.GetTriangles(mesh);
 		}
 
-		public Mesh[] Slice(Vector3 pos, Quaternion rot){
+		public Mesh[] Slice(Vector3 pos, Quaternion rot,bool closeEdges= false){
 
 			//Sorting vertices
-			Vector3[] v = mesh.vertices;
-			int[] t = mesh.triangles;
-			Vector3[] n = mesh.normals;
-			Vector2[] u = mesh.uv;
+			int[] sorted = SortVertices(_mesh.vertices, pos, rot);
 
-			int[] sorted = SortVertices(v, pos, rot);
-
-
-			List<Vector3> vAbove;
-			List<Vector3> vBelow;
-			GetVerticesBelovAndAbove(sorted, v, out vAbove, out vBelow);
-
-			List<int> tAbove;
-			List<int> tBelow;
-			GetTrianglesBelowAhdAbove(sorted, t, out tAbove, out tBelow);
-
-			List<Vector3> nAbove;
-			List<Vector3> nBelow;
-			GetNormalsBelowAhdAbove(sorted, n, out nAbove, out nBelow);
-
-			List<Vector2> uAbove;
-			List<Vector2> uBelow;
-			GetUvBelowAhdAbove(sorted, u, out uAbove, out uBelow);
+			GetVerticesBelovAndAbove(sorted, _mesh.vertices, out var vAbove, out var vBelow);
+			GetTrianglesBelowAhdAbove(sorted, _mesh.triangles, out var tAbove, out var tBelow);
+			GetNormalsBelowAhdAbove(sorted, _mesh.normals, out var nAbove, out var nBelow);
+			GetUvBelowAhdAbove(sorted, _mesh.uv, out var uAbove, out var uBelow);
 
 			//Getting t in between
-			Triangle[] inBetween;
-			inBetween = GetIntersectedTriangels(triangles, sorted);
-
-
-
+			Triangle[] inBetween = GetIntersectedTriangels(_triangles, sorted);
 
 			foreach (Triangle tr in inBetween){
-				bool tUp = IsTriangleUp(tr,sorted);
 
-				Vector3[] newNormals;
-				Vector2[] newUVs;
-				Vector3[] newVertices = GetTriangleCutVertices(pos, rot, tr,out newNormals,out newUVs);
+				Vector3[] newVertices = GetTriangleCutVertices(pos, rot, tr,out var newNormals,out var newUVs);
 
 				vAbove.AddRange(newVertices);
-
 				vBelow.AddRange(newVertices);
+
 				int aboveCount = vAbove.Count;
 				int belowCount = vBelow.Count;
 
-				int[] newTU = GetNewTrianglesUp(tr,sorted);
-				int[] newTD = GetReverse(newTU);
+				int[] newTrianglesUp = GetNewTrianglesUp(tr,sorted);
+				int[] newTrianglesDown = GetReverse(newTrianglesUp);
+
+				bool tUp = IsTriangleUp(tr,sorted);
 				if (tUp){
-					tAbove.AddRange(GetUpTriangles(newTU, aboveCount));
-					tBelow.AddRange(GetDownTriangles(newTD, belowCount));
+					tAbove.AddRange(GetUpTriangles(newTrianglesUp, aboveCount));
+					tBelow.AddRange(GetDownTriangles(newTrianglesDown, belowCount));
 				}
 				else{
-					tAbove.AddRange(GetDownTriangles(newTU, aboveCount));
-					tBelow.AddRange(GetUpTriangles(newTD, belowCount));
+					tAbove.AddRange(GetDownTriangles(newTrianglesUp, aboveCount));
+					tBelow.AddRange(GetUpTriangles(newTrianglesDown, belowCount));
 				}
 
 				nAbove.AddRange(newNormals);
@@ -80,43 +58,19 @@ namespace Assets.Scripts{
 			}
 
 			//Mesh Above
-			Mesh mAbove = new Mesh();
-			mAbove.vertices = vAbove.ToArray();
-			mAbove.triangles = tAbove.ToArray();
-			mAbove.normals = nAbove.ToArray();
-			mAbove.uv = uAbove.ToArray();
-			//Mesh Above
-			Mesh mBelow = new Mesh();
-			mBelow.vertices = vBelow.ToArray();
-			mBelow.triangles = tBelow.ToArray();
-			mBelow.normals = nBelow.ToArray();
-			mBelow.uv = uBelow.ToArray();
+			Mesh mAbove = AssembleMesh(vAbove, tAbove, nAbove, uAbove);
+			Mesh mBelow = AssembleMesh(vBelow, tBelow, nBelow, uBelow);
+
 			return new[]{mAbove,mBelow};
 		}
 
 		public Vector3[] GetMashCutVertices(Vector3 pos, Quaternion rot){
 
 			//Sorting vertices
-			Vector3[] v = mesh.vertices;
-			int[] t = mesh.triangles;
-			Vector3[] n = mesh.normals;
-			int[] sorted = SortVertices(v, pos, rot);
-
-			List<Vector3> vAbove;
-			List<Vector3> vBelow;
-			GetVerticesBelovAndAbove(sorted, v, out vAbove, out vBelow);
-
-			List<int> tAbove;
-			List<int> tBelow;
-			GetTrianglesBelowAhdAbove(sorted, t, out tAbove, out tBelow);
-
-			List<Vector3> nAbove;
-			List<Vector3> nBelow;
-			GetNormalsBelowAhdAbove(sorted, n, out nAbove, out nBelow);
+			int[] sorted = SortVertices(_mesh.vertices, pos, rot);
 
 			//Getting t in between
-			Triangle[] inBetween;
-			inBetween = GetIntersectedTriangels(triangles, sorted);
+			Triangle[] inBetween = GetIntersectedTriangels(_triangles, sorted);
 
 
 			List<Vector3> dots = new List<Vector3>();
@@ -127,6 +81,16 @@ namespace Assets.Scripts{
 			}
 
 			return dots.ToArray();
+		}
+
+		private static Mesh AssembleMesh(List<Vector3> vBelow, List<int> tBelow, List<Vector3> nBelow, List<Vector2> uBelow){
+			Mesh mBelow;
+			mBelow = new Mesh();
+			mBelow.vertices = vBelow.ToArray();
+			mBelow.triangles = tBelow.ToArray();
+			mBelow.normals = nBelow.ToArray();
+			mBelow.uv = uBelow.ToArray();
+			return mBelow;
 		}
 
 		private void GetUvBelowAhdAbove(int[] sorted, Vector2[] u, out List<Vector2> uAbove, out List<Vector2> uBelow){
@@ -245,10 +209,10 @@ namespace Assets.Scripts{
 				int b = sorted[t[(i * 3) + 1]];
 				int c = sorted[t[(i * 3) + 2]];
 				if(a>=0&&b>=0&&c>=0){
-					tAbelow.AddRange(new int[]{a,b,c});
+					tAbelow.AddRange(new[]{a,b,c});
 				}
 				else if(a<0&&b<0&&c<0)
-					tBelow.AddRange(new int[]{-a-1,-b-1,-c-1});
+					tBelow.AddRange(new[]{-a-1,-b-1,-c-1});
 			}
 		}
 
@@ -301,10 +265,7 @@ namespace Assets.Scripts{
 		}
 
 		private Vector3[] GetTriangleCutVertices(Vector3 point, Quaternion rot, Triangle t){
-
-			Vector3[] v3;
-			Vector2[] v2;
-			return GetTriangleCutVertices(point, rot, t, out v3, out v2);
+			return GetTriangleCutVertices(point, rot, t, out _, out _);
 		}
 
 		private Vector3[] GetTriangleCutVertices(Vector3 point, Quaternion rot, Triangle t,out Vector3[] normals, out Vector2[] uvs){
@@ -315,10 +276,10 @@ namespace Assets.Scripts{
 				Vector3 AB; Vector3 BC;  Vector3 AC;
 				Vector3 ABn; Vector3 BCn;  Vector3 ACn;
 				Vector2 ABu; Vector2 BCu;  Vector2 ACu;
-			bool IsAB = IsEdgeIntersected(t.EdgeAB, point, rot, out AB,out ABn,out ABu);
-			bool IsBC = IsEdgeIntersected(t.EdgeBC, point, rot, out BC,out BCn,out BCu);
-			bool IsAC = IsEdgeIntersected(t.EdgeAC, point, rot, out AC,out ACn,out ACu);
-			if (!IsAB){
+			bool isAb = IsEdgeIntersected(t.EdgeAB, point, rot, out AB,out ABn,out ABu);
+			bool isBc = IsEdgeIntersected(t.EdgeBC, point, rot, out BC,out BCn,out BCu);
+			bool isAc = IsEdgeIntersected(t.EdgeAC, point, rot, out AC,out ACn,out ACu);
+			if (!isAb){
 				dots.Add(AC);
 				dots.Add(BC);
 				
@@ -329,7 +290,7 @@ namespace Assets.Scripts{
 				uvsL.Add(BCu);
 
 			}
-			if (!IsBC){
+			if (!isBc){
 				dots.Add(AB);
 				dots.Add(AC);
 
@@ -339,7 +300,7 @@ namespace Assets.Scripts{
 				uvsL.Add(ABu);
 				uvsL.Add(ACu);
 			}
-			if (!IsAC){
+			if (!isAc){
 				dots.Add(BC);
 				dots.Add(AB);
 
@@ -354,27 +315,28 @@ namespace Assets.Scripts{
 			uvs = uvsL.ToArray();
 			return dots.ToArray();
 		}
+
 		private bool IsEdgeIntersected(Edge edge, Vector3 pos, Quaternion rot, out Vector3 intersectionPoint, out Vector3 normal,out Vector2 uv){
-			Vector3 A = (rot * (mesh.vertices[edge.VerticeA]))+pos; 
-			Vector3 B = (rot * (mesh.vertices[edge.VerticeB]))+pos;
+			Vector3 a = (rot * (_mesh.vertices[edge.VerticeA]))+pos; 
+			Vector3 b = (rot * (_mesh.vertices[edge.VerticeB]))+pos;
 
-			bool AB = A.y >= 0 && B.y <= 0;
-			bool BA = B.y >= 0 && A.y <= 0;
+			bool ab = a.y >= 0 && b.y <= 0;
+			bool ba = b.y >= 0 && a.y <= 0;
 			intersectionPoint = default;
-			if (AB||BA){
-				float newXStep = ((B.x - A.x) / (B.y - A.y));
-				float newX =((-1*A.y)*newXStep) +A.x;
+			if (ab||ba){
+				float newXStep = ((b.x - a.x) / (b.y - a.y));
+				float newX =((-1*a.y)*newXStep) +a.x;
 
-				float newZStep = ((B.z - A.z) / (B.y - A.y));
-				float newZ =((-1*A.y)*newZStep) +A.z;
+				float newZStep = ((b.z - a.z) / (b.y - a.y));
+				float newZ =((-1*a.y)*newZStep) +a.z;
 				Vector3 p =new Vector3(newX,0,newZ);
 
 				intersectionPoint = p;
 				intersectionPoint = (Quaternion.Inverse(rot)*(new Vector3(newX,0,newZ)-pos));
 
-				float lerp = InverseLerp(A,B,p);
-				normal = Vector3.Lerp(mesh.normals[edge.VerticeA], mesh.normals[edge.VerticeB], lerp);
-				uv = Vector3.Lerp(mesh.uv[edge.VerticeA], mesh.uv[edge.VerticeB], lerp);
+				float lerp = InverseLerp(a,b,p);
+				normal = Vector3.Lerp(_mesh.normals[edge.VerticeA], _mesh.normals[edge.VerticeB], lerp);
+				uv = Vector3.Lerp(_mesh.uv[edge.VerticeA], _mesh.uv[edge.VerticeB], lerp);
 
 				return true;
 
@@ -386,14 +348,13 @@ namespace Assets.Scripts{
 
 			return false;
 		}
+
 		private float InverseLerp(Vector3 a, Vector3 b, Vector3 value)
 		{
 			Vector3 ab = b - a;
 			Vector3 av = value - a;
 			return Vector3.Dot(av, ab) / Vector3.Dot(ab, ab);
 		}
-
-
 
 		private bool IsVerticesAbove(Vector3 point, Vector3 pos, Quaternion rot){
 
