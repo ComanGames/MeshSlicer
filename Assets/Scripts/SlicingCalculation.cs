@@ -14,10 +14,7 @@ namespace Assets.Scripts{
 			this.mesh = mesh;
 		}
 
-		public Mesh[] Slice(Vector3 pos, Quaternion rot, bool[,] adjacency = null){
-
-			if (adjacency == null)
-				adjacency = GenerateAdjancy();
+		public Mesh[] Slice(Vector3 pos, Quaternion rot){
 
 			Triangle[] triangle = GetTriangles();
 
@@ -55,7 +52,7 @@ namespace Assets.Scripts{
 
 
 			foreach (Triangle tr in inBetween){
-				bool tUp = IsTriaangleUp(tr,sorted);
+				bool tUp = IsTriangleUp(tr,sorted);
 
 				Vector3[] newNormals;
 				Vector2[] newUVs;
@@ -100,6 +97,44 @@ namespace Assets.Scripts{
 			return new[]{mAbove,mBelow};
 		}
 
+		public Vector3[] GetMashCutVertices(Vector3 pos, Quaternion rot){
+
+			Triangle[] triangle = GetTriangles();
+
+
+			//Sorting vertices
+			Vector3[] v = mesh.vertices;
+			int[] t = mesh.triangles;
+			Vector3[] n = mesh.normals;
+			int[] sorted = SortVertices(v, pos, rot);
+
+			List<Vector3> vAbove;
+			List<Vector3> vBelow;
+			GetVerticesBelovAndAbove(sorted, v, out vAbove, out vBelow);
+
+			List<int> tAbove;
+			List<int> tBelow;
+			GetTrianglesBelowAhdAbove(sorted, t, out tAbove, out tBelow);
+
+			List<Vector3> nAbove;
+			List<Vector3> nBelow;
+			GetNormalsBelowAhdAbove(sorted, n, out nAbove, out nBelow);
+
+			//Getting t in between
+			Triangle[] inBetween;
+			inBetween = GetIntersectedTriangels(triangle, sorted);
+
+
+			List<Vector3> dots = new List<Vector3>();
+
+			
+			foreach (Triangle tr in inBetween){
+				dots.AddRange(GetTriangleCutVertices(pos, rot, tr));
+			}
+
+			return dots.ToArray();
+		}
+
 		private void GetUvBelowAhdAbove(int[] sorted, Vector2[] u, out List<Vector2> uAbove, out List<Vector2> uBelow){
 			uAbove = new List<Vector2>();
 			uBelow = new List<Vector2>();
@@ -120,7 +155,6 @@ namespace Assets.Scripts{
 
 			return r;
 		}
-
 
 		private  int[] GetDownTriangles(int[] newT, int aboveCount){
 			List<int> t = new List<int>();
@@ -175,17 +209,6 @@ namespace Assets.Scripts{
 			return triangle;
 		}
 
-		private int[] GetVerticesBelow(Triangle tr, int[] sorted){
-			List<int> result = new List<int>();
-			foreach (int i in tr.GetVertices())
-			{
-				if (sorted[i] < 0)
-					result.Add(sorted[i]);
-			}
-
-			return result.ToArray();
-		}
-
 		private int[] GetNewTrianglesUp(Triangle tr,int[]sorted){
 			List<int> result = new List<int>();
 			foreach (int i in tr.GetVertices()){
@@ -195,7 +218,7 @@ namespace Assets.Scripts{
 			return result.ToArray();
 		}
 
-		private bool IsTriaangleUp(Triangle t, int[] s){
+		private bool IsTriangleUp(Triangle t, int[] s){
 			int index = 0;
 			foreach (int v in t.GetVertices()){
 				if (s[v] == 0)
@@ -206,48 +229,6 @@ namespace Assets.Scripts{
 
 			return index == -1;
 
-		}
-
-		public Vector3[] GetMashCutVertices(Vector3 pos, Quaternion rot, bool[,] adjacency = null){
-
-			if (adjacency == null)
-				adjacency = GenerateAdjancy();
-
-			Triangle[] triangle = GetTriangles();
-
-
-			//Sorting vertices
-			Vector3[] v = mesh.vertices;
-			int[] t = mesh.triangles;
-			Vector3[] n = mesh.normals;
-			int[] sorted = SortVertices(v, pos, rot);
-
-
-			List<Vector3> vAbove;
-			List<Vector3> vBelow;
-			GetVerticesBelovAndAbove(sorted, v, out vAbove, out vBelow);
-
-			List<int> tAbove;
-			List<int> tBelow;
-			GetTrianglesBelowAhdAbove(sorted, t, out tAbove, out tBelow);
-
-			List<Vector3> nAbove;
-			List<Vector3> nBelow;
-			GetNormalsBelowAhdAbove(sorted, n, out nAbove, out nBelow);
-
-			//Getting t in between
-			Triangle[] inBetween;
-			inBetween = GetIntersectedTriangels(triangle, sorted);
-
-
-			List<Vector3> dots = new List<Vector3>();
-
-			
-			foreach (Triangle tr in inBetween){
-				dots.AddRange(GetTriangleCutVertices(pos, rot, tr));
-			}
-
-			return dots.ToArray();
 		}
 
 		private void GetNormalsBelowAhdAbove(int[] sorted, Vector3[] n, out List<Vector3> nAbove, out List<Vector3> nBelow){
@@ -276,7 +257,6 @@ namespace Assets.Scripts{
 					tBelow.AddRange(new int[]{-a-1,-b-1,-c-1});
 			}
 		}
-
 
 		private static void GetVerticesBelovAndAbove(int[] sorted, Vector3[] v, out List<Vector3> vAbove, out List<Vector3> vBelow){
 			vAbove = new List<Vector3>();
@@ -308,14 +288,12 @@ namespace Assets.Scripts{
 
 			return tIntersection.ToArray();
 		}
-
-
 		private int[] SortVertices(Vector3[] v, Vector3 pos, Quaternion rot){
 			int[] result = new int[v.Length];
 			int up = 0;
 			int down = -1;
 			for (int i = 0; i < v.Length; i++){
-				if (IsVertAbove(v[i], pos, rot)){
+				if (IsVerticesAbove(v[i], pos, rot)){
 					result[i] = up;
 					up++;
 				}
@@ -382,7 +360,6 @@ namespace Assets.Scripts{
 			uvs = uvsL.ToArray();
 			return dots.ToArray();
 		}
-
 		private bool IsEdgeIntersected(Edge edge, Vector3 pos, Quaternion rot, out Vector3 intersectionPoint, out Vector3 normal,out Vector2 uv){
 			Vector3 A = (rot * (mesh.vertices[edge.VerticeA]))+pos; 
 			Vector3 B = (rot * (mesh.vertices[edge.VerticeB]))+pos;
@@ -415,52 +392,11 @@ namespace Assets.Scripts{
 
 			return false;
 		}
-
 		public static float InverseLerp(Vector3 a, Vector3 b, Vector3 value)
 		{
 			Vector3 ab = b - a;
 			Vector3 av = value - a;
 			return Vector3.Dot(av, ab) / Vector3.Dot(ab, ab);
-		}
-
-		private bool HaveSameEdge(Triangle triangleA, Triangle triangleB){
-			return GetSameEdge(triangleA,triangleB) != null;
-		}
-
-
-		private Edge GetSameEdge(Triangle triangleA, Triangle triangleB){
-			Edge[] edgesA = triangleA.GetEdges();
-			Edge[] edgesB = triangleB.GetEdges();
-
-			for (int i = 0; i < edgesA.Length; i++){
-				for (int j = 0; j < edgesB.Length; j++){
-					if (edgesA[i].Equals(edgesB[j])){
-						edgesB[j] = edgesA[i];
-						return edgesA[i];
-					}
-				}
-			}
-			return null;
-		}
-
-		private bool IsTriangleAbove(Triangle triangle, Vector3 pos, Quaternion rot){
-			Vector3 A = mesh.vertices[triangle.A];
-			Vector3 B = mesh.vertices[triangle.B];
-			Vector3 C = mesh.vertices[triangle.C];
-
-			return IsVertAbove(A, pos, rot)
-			       && IsVertAbove(B, pos, rot)
-			       && IsVertAbove(C, pos, rot);
-		}
-		private bool IsTriangleBelow(Triangle triangle, Vector3 pos, Quaternion rot){
-
-			Vector3 A = mesh.vertices[triangle.A];
-			Vector3 B = mesh.vertices[triangle.B];
-			Vector3 C = mesh.vertices[triangle.C];
-
-			return !IsVertAbove(A, pos, rot)
-			       && !IsVertAbove(B, pos, rot)
-			       && !IsVertAbove(C, pos, rot);
 		}
 
 		private Triangle[] GetTriangles(){
@@ -475,26 +411,11 @@ namespace Assets.Scripts{
 			return triangle;
 		}
 
-		private bool IsVertAbove(Vector3 point, Vector3 pos, Quaternion rot){
+		private bool IsVerticesAbove(Vector3 point, Vector3 pos, Quaternion rot){
 
 			 Vector3 p = (rot * point ) +pos;
 			return p.y > 0;
 		}
 
-		private bool[,] GenerateAdjancy(){
-			int m = mesh.vertices.Length;
-			bool[,] P = new bool[m,m];
-			for (int i = 0; i < mesh.triangles.Length; i+=3){
-
-				int a = mesh.triangles[i];
-				int b = mesh.triangles[i + 1];
-				int c = mesh.triangles[i + 2];
-
-				P[a,b]=P[b,a]=
-					P[b,c]=P[c,b]=
-						P[a,c]=P[c,a]= true;
-			}
-			return P;
-		}
 	}
 }
