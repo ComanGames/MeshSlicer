@@ -1,32 +1,35 @@
-﻿using Assets.Scripts;
+﻿using Assets.Scripts.Slicer;
 using UnityEngine;
 
-[RequireComponent(typeof(Mesh))]
-public class SlicerDebug : MonoBehaviour{
+namespace Assets.Scripts{
+	[RequireComponent(typeof(Mesh))]
+	public class SlicerDebug : MonoBehaviour{
 
-	public Mesh mesh;
-	public Vector3 Angle;
-	public Vector3 Pos;
+		public Mesh mesh;
+		public Vector3 Angle;
+		public Vector3 Pos;
 
-	private void OnDrawGizmosSelected()
-	{
+		private void OnDrawGizmosSelected()
+		{
 		
-		SlicingCalculation slice = new SlicingCalculation(mesh);
-		Vector3[] vertices = slice.GetMashCutVertices(Pos,Quaternion.Euler(Angle));
-		for (int i = 0; i < vertices.Length; i++){
-			Gizmos.DrawSphere(vertices[i]+transform.position,0.01f);
+			ISlicer slice = new BaseSlicer(new MeshInfo(mesh));
+
+			Vector3[] vertices = slice.GetSliceVertices(Pos,Quaternion.Euler(Angle));
+			for (int i = 0; i < vertices.Length; i++){
+				Gizmos.DrawSphere(vertices[i]+transform.position,0.01f);
+			}
+
+
+			Mesh testMesh = slice.Slice(Pos,Quaternion.Euler(Angle))[1].GetMesh();
+			foreach (Vector3 v in testMesh.vertices){
+				Gizmos.DrawCube(v,Vector3.one*0.01f);
+			}
+
+			GetComponent<MeshFilter>().mesh = testMesh;
+
+
+
 		}
-
-
-		Mesh testMesh = slice.Slice(Pos,Quaternion.Euler(Angle))[1];
-		foreach (Vector3 v in testMesh.vertices){
-			Gizmos.DrawCube(v,Vector3.one*0.01f);
-		}
-
-		GetComponent<MeshFilter>().mesh = testMesh;
-
-
 
 	}
-
 }

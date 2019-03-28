@@ -1,7 +1,6 @@
 ﻿using System;
-using UnityEngine;
 
-namespace Assets.Scripts{
+namespace Assets.Scripts.Slicer{
 	public class Triangle:IEquatable<Triangle>{
 		public int A;
 		public int B;
@@ -24,7 +23,7 @@ namespace Assets.Scripts{
 		public int[] GetVertices(){
 			return new[]{A, B, C};
 		}
-		public static Triangle[] GetTriangles(Mesh m){
+		public static Triangle[] GetTriangles(MeshInfo m){
 			Triangle[] triangles = new Triangle[m.triangles.Length / 3];
 			for (int i = 0; i < triangles.Length; i++){
 				int a = m.triangles[(i * 3)];

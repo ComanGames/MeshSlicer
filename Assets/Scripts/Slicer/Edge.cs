@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Assets.Scripts{
+namespace Assets.Scripts.Slicer{
 	public class Edge:IEquatable<Edge>{
 		private List<Triangle> Triangles;
 		public int VerticeA ;
