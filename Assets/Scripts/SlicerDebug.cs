@@ -12,7 +12,7 @@ namespace Assets.Scripts{
 		private void OnDrawGizmosSelected()
 		{
 		
-			ISlicer slice = new BaseSlicer(new MeshInfo(mesh));
+			ISlicer slice = new ClosedSlicer(new MeshInfo(mesh));
 
 			Vector3[] vertices = slice.GetSliceVertices(Pos,Quaternion.Euler(Angle));
 			for (int i = 0; i < vertices.Length; i++){
