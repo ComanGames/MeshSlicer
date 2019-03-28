@@ -91,14 +91,14 @@ namespace Assets.Scripts.Slicer{
 
 		private static MeshInfo AssembleMesh(List<Vector3> vertices, List<int> triangles, List<Vector3> normals, List<Vector2> uv){
 			MeshInfo m = new MeshInfo();
-			m.vertices = vertices.ToArray();
-			m.triangles = triangles.ToArray();
-			m.normals = normals.ToArray();
-			m.uv = uv.ToArray();
+			m.vertices = vertices;
+			m.triangles = triangles;
+			m.normals = normals;
+			m.uv = uv;
 			return m;
 		}
 
-		private void GetUvBelowAhdAbove(int[] sorted, Vector2[] u, out List<Vector2> uAbove, out List<Vector2> uBelow){
+		private void GetUvBelowAhdAbove(int[] sorted,List< Vector2> u, out List<Vector2> uAbove, out List<Vector2> uBelow){
 			uAbove = new List<Vector2>();
 			uBelow = new List<Vector2>();
 			for (int i = 0; i < sorted.Length; i++)
@@ -194,7 +194,7 @@ namespace Assets.Scripts.Slicer{
 
 		}
 
-		private void GetNormalsBelowAhdAbove(int[] sorted, Vector3[] n, out List<Vector3> nAbove, out List<Vector3> nBelow){
+		private void GetNormalsBelowAhdAbove(int[] sorted,List<Vector3> n, out List<Vector3> nAbove, out List<Vector3> nBelow){
 			nAbove = new List<Vector3>();
 			nBelow = new List<Vector3>();
 			for (int i = 0; i < sorted.Length; i++)
@@ -206,10 +206,10 @@ namespace Assets.Scripts.Slicer{
 			}
 		}
 
-		private void GetTrianglesBelowAhdAbove(int[] sorted, int[] t, out List<int> tAbelow, out List<int> tBelow){
+		private void GetTrianglesBelowAhdAbove(int[] sorted, List<int> t, out List<int> tAbelow, out List<int> tBelow){
 			tAbelow = new List<int>();
 			tBelow = new List<int>();
-			for (int i = 0; i < t.Length/3; i++){
+			for (int i = 0; i < t.Count/3; i++){
 				int a = sorted[t[(i * 3)]];
 				int b = sorted[t[(i * 3) + 1]];
 				int c = sorted[t[(i * 3) + 2]];
@@ -221,10 +221,10 @@ namespace Assets.Scripts.Slicer{
 			}
 		}
 
-		private static void GetVerticesBelovAndAbove(int[] sorted, Vector3[] v, out List<Vector3> vAbove, out List<Vector3> vBelow){
+		private static void GetVerticesBelovAndAbove(int[] sorted, List<Vector3> v, out List<Vector3> vAbove, out List<Vector3> vBelow){
 			vAbove = new List<Vector3>();
 			vBelow = new List<Vector3>();
-			for (int i = 0; i < v.Length; i++){
+			for (int i = 0; i < v.Count; i++){
 				if (sorted[i] >= 0)
 					vAbove.Add(v[i]);
 				else
@@ -251,11 +251,11 @@ namespace Assets.Scripts.Slicer{
 
 			return tIntersection.ToArray();
 		}
-		private int[] SortVertices(Vector3[] v, Vector3 pos, Quaternion rot){
-			int[] result = new int[v.Length];
+		private int[] SortVertices( List<Vector3> v, Vector3 pos, Quaternion rot){
+			int[] result = new int[v.Count];
 			int up = 0;
 			int down = -1;
-			for (int i = 0; i < v.Length; i++){
+			for (int i = 0; i < v.Count; i++){
 				if (IsVerticesAbove(v[i], pos, rot)){
 					result[i] = up;
 					up++;

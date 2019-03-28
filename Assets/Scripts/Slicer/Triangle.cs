@@ -24,7 +24,7 @@ namespace Assets.Scripts.Slicer{
 			return new[]{A, B, C};
 		}
 		public static Triangle[] GetTriangles(MeshInfo m){
-			Triangle[] triangles = new Triangle[m.triangles.Length / 3];
+			Triangle[] triangles = new Triangle[m.triangles.Count / 3];
 			for (int i = 0; i < triangles.Length; i++){
 				int a = m.triangles[(i * 3)];
 				int b = m.triangles[(i * 3) + 1];

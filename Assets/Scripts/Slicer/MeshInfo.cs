@@ -25,8 +25,11 @@ namespace Assets.Scripts.Slicer{
 			Mesh mesh = new Mesh();
 			mesh.vertices = vertices.ToArray();
 			mesh.triangles = triangles.ToArray();
-			mesh.normals = normals.ToArray();
-			mesh.uv = uv.ToArray();
+			if(normals.Count>0)
+				mesh.normals = normals.ToArray();
+			if(uv.Count>0)
+				mesh.uv = uv.ToArray();
+
 			mesh.name = name;
 			return mesh;
 

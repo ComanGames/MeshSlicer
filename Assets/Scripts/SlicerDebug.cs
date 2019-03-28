@@ -12,7 +12,7 @@ namespace Assets.Scripts{
 		private void OnDrawGizmosSelected()
 		{
 		
-			ISlicer slice = new BaseSlicer(new MeshInfo(mesh));
+			ISlicer slice = new ClosedSlicer(new MeshInfo(mesh));
 
 			Vector3[] vertices = slice.GetSliceVertices(Pos,Quaternion.Euler(Angle));
 			for (int i = 0; i < vertices.Length; i++){
@@ -20,7 +20,7 @@ namespace Assets.Scripts{
 			}
 
 
-			Mesh testMesh = slice.Slice(Pos,Quaternion.Euler(Angle))[1].GetMesh();
+			Mesh testMesh = slice.Slice(Pos,Quaternion.Euler(Angle))[0].GetMesh();
 			foreach (Vector3 v in testMesh.vertices){
 				Gizmos.DrawCube(v,Vector3.one*0.01f);
 			}

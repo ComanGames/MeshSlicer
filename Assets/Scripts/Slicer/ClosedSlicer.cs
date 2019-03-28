@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -6,47 +7,65 @@ namespace Assets.Scripts.Slicer{
 	public class ClosedSlicer:BaseSlicer,ISlicer{
 		public ClosedSlicer(MeshInfo meshInfo) : base(meshInfo){ }
 		protected override void PostProcessing(MeshInfo mAbove, MeshInfo mBelow, int newCount){
-			Vector3[] newVertices = new Vector3[newCount+1];
-			int startIndex = mAbove.vertices.Length - newCount;
+			if (newCount == 0)
+				return;
+
+			Vector3[] newVertices = new Vector3[newCount];
+			int startIndex = mAbove.vertices.Count - newCount;
 			for (int i = 0; i < newVertices.Length-1; i++)
 				newVertices[i] = mAbove.vertices[startIndex + i];
 
 			Vector3 avrage = GetAverage(newVertices);
 
-			int shift = mAbove.vertices.Length;
+			int shift = mAbove.vertices.Count;
 			int[]newTriangles = new int[(newCount/2)*3];
-			for (int i = 0; i < newTriangles.Length/3; i++){
-				int index = i*3;
-				newTriangles[index] = shift+newCount;
-				newTriangles[index + 1] = shift + i + 1;
-				newTriangles[index + 2] = shift + i + 1;
+			for (int i = 0; i < (newTriangles.Length / 3)-1; i++){
+				int index = i * 3;
+
+				if (i % 2 == 0){
+					newTriangles[index] = shift + newCount;
+					newTriangles[index + 1] = shift + i * 2;
+					newTriangles[index + 2] = shift + i * 2 + 1;
+				}
+				else{
+					newTriangles[index+2] = shift + newCount;
+					newTriangles[index + 1] = shift + i * 2;
+					newTriangles[index ] = shift + i * 2 + 1;
+				}
 			}
-
-			List<Vector3> vAbove = mAbove.vertices.ToList();
-			List<Vector3> vBelow = mBelow.vertices.ToList();
-
-			vAbove.AddRange(newVertices);
-			vBelow.AddRange(newVertices);
-			vAbove.Add(avrage);
-			vBelow.Add(avrage);
-
-			List<Vector3> vAbove = mAbove.vertices.ToList();
-			List<Vector3> vBelow = mBelow.vertices.ToList();
-
 			
+			newTriangles[newTriangles.Length - 1] = shift + newCount;
+			newTriangles[newTriangles.Length -2] = shift;
+			newTriangles[newTriangles.Length-3 ] = shift +newCount-3;
+
+			mAbove.vertices.AddRange(newVertices);
+			mAbove.vertices.Add(avrage);
+
+			mAbove.triangles.AddRange(newTriangles);
+
+			int count = Math.Max(0, mAbove.normals.Count() - newCount);
+			Vector3 newNormal = GetAverage(mAbove.normals.Skip(count).ToArray());
+
+			Vector3[] newNormals = Enumerable.Repeat(newNormal, newCount + 1).ToArray();
+			mAbove.normals.AddRange(newNormals);
+
+
+			IEnumerable<Vector2> collection = Enumerable.Repeat(Vector2.zero,newCount+1);
+			mAbove.uv.AddRange(collection);
 
 		}
 
 		private Vector3 GetAverage(Vector3[] newVertices){
-			long x = 0;
-			long y = 0;
-			long z = 0;
+			float x = 0;
+			float y = 0;
+			float z = 0;
 			int c = newVertices.Length;
 			for (int i = 0; i < newVertices.Length; i++){
-				x += (long)newVertices[i].x;
-				y += (long)newVertices[i].y;
-				z += (long)newVertices[i].z;
+				x += newVertices[i].x;
+				y += newVertices[i].y;
+				z += newVertices[i].z;
 			}
+
 			return new Vector3(x/c,y/c,z/c);
 		}
 	}
