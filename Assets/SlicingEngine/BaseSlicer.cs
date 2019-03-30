@@ -63,7 +63,7 @@ namespace Assets.Scripts.Slicer{
 			MeshInfo mAbove = AssembleMesh(vAbove, tAbove, nAbove, uAbove);
 			MeshInfo mBelow = AssembleMesh(vBelow, tBelow, nBelow, uBelow);
 
-			PostProcessing(mAbove, mBelow,newVerticesCount);
+			PostProcessing(mAbove, mBelow,newVerticesCount,rot);
 			return new[]{mAbove,mBelow};
 		}
 
@@ -86,7 +86,7 @@ namespace Assets.Scripts.Slicer{
 			return dots.ToArray();
 		}
 
-		protected virtual void PostProcessing(MeshInfo mAbove, MeshInfo mBelow,int newCount){
+		protected virtual void PostProcessing(MeshInfo mAbove, MeshInfo mBelow,int newCount,Quaternion rot){
 		}
 
 		private static MeshInfo AssembleMesh(List<Vector3> vertices, List<int> triangles, List<Vector3> normals, List<Vector2> uv){
@@ -101,14 +101,21 @@ namespace Assets.Scripts.Slicer{
 		private void GetUvBelowAhdAbove(int[] sorted,List< Vector2> u, out List<Vector2> uAbove, out List<Vector2> uBelow){
 			uAbove = new List<Vector2>();
 			uBelow = new List<Vector2>();
-			for (int i = 0; i < sorted.Length; i++)
-			{
+			if(u.Count == 0)
+				return;
+
+			for (int i = 0; i < sorted.Length; i++){
+				int j = (i + 1) * -1;
 				if (sorted[i] >= 0)
-					uAbove.Add(u[i]);
-				else
-					uBelow.Add(u[i]);
+					if(u.Count<i)
+						uAbove.Add(u[i]);
+				else{
+					if(u.Count<j)
+						uBelow.Add(u[j]);
+				}
 			}
 		}
+
 
 		private int[] GetReverse(int[] newTu){
 			int[] r = new int[newTu.Length];
@@ -339,8 +346,9 @@ namespace Assets.Scripts.Slicer{
 
 				float lerp = InverseLerp(a,b,p);
 				normal = Vector3.Lerp(_meshInfo.normals[edge.VerticeA], _meshInfo.normals[edge.VerticeB], lerp);
-				uv = Vector3.Lerp(_meshInfo.uv[edge.VerticeA], _meshInfo.uv[edge.VerticeB], lerp);
-
+				uv = Vector2.zero;
+				if(_meshInfo.uv.Count>edge.VerticeA&&_meshInfo.uv.Count>edge.VerticeB)
+					uv = Vector3.Lerp(_meshInfo.uv[edge.VerticeA], _meshInfo.uv[edge.VerticeB], lerp);
 				return true;
 
 

@@ -6,35 +6,45 @@ using UnityEngine;
 namespace Assets.Scripts.Slicer{
 	public class ClosedSlicer:BaseSlicer,ISlicer{
 		public ClosedSlicer(MeshInfo meshInfo) : base(meshInfo){ }
-		protected override void PostProcessing(MeshInfo mAbove, MeshInfo mBelow, int newCount){
+		protected override void PostProcessing(MeshInfo mAbove, MeshInfo mBelow, int newCount,Quaternion rot){
 			if (newCount == 0)
 				return;
 
 			int startIndex = mAbove.vertices.Count - newCount;
-			Vector3[] newVertices = mAbove.vertices.Skip(startIndex).ToArray();
+			int startIndexBelow = mBelow.vertices.Count - newCount;
+			Vector3[] newVerticesAbove = mAbove.vertices.Skip(startIndex).ToArray();
+			Vector3[] newVerticesBelow = mBelow.vertices.Skip(startIndexBelow).ToArray();
 
-			Vector3 avrage = GetAverage(newVertices);
+			Vector3 avrage = GetAverage(newVerticesAbove);
 
-			int[] newTriangles;
+			int[] newTrianglesAbove;
+			int[] newTrianglesBelow;
 
-			newTriangles = TriangelsRecalculation(mAbove, newCount);
+			newTrianglesAbove = TriangelsRecalculation(mAbove, newCount);
+			newTrianglesBelow = TriangelsRecalculation(mBelow, newCount);
 
-			mAbove.vertices.AddRange(newVertices);
+			mAbove.vertices.AddRange(newVerticesAbove);
 			mAbove.vertices.Add(avrage);
 
-			mAbove.triangles.AddRange(newTriangles);
+			mBelow.vertices.AddRange(newVerticesBelow);
+			mBelow.vertices.Add(avrage);
 
-			int count = Math.Max(0, mAbove.normals.Count() - newCount);
-			Vector3 newNormal = GetAverage(mAbove.normals.Skip(count).ToArray());
+			mAbove.triangles.AddRange(newTrianglesAbove);
+			mBelow.triangles.AddRange(newTrianglesBelow);
 
-			Vector3[] newNormals = Enumerable.Repeat(newNormal, newCount + 1).ToArray();
-			mAbove.normals.AddRange(newNormals);
+
+			Vector3 newNormalAbove = rot*Vector3.up;
+			Vector3 newNormalBelow = rot*Vector3.down;
+
+			mAbove.normals.AddRange(Enumerable.Repeat(newNormalAbove, newCount +1).ToArray());
+			mBelow.normals.AddRange(Enumerable.Repeat(newNormalBelow, newCount +1).ToArray());
 
 
 			IEnumerable<Vector2> collection = Enumerable.Repeat(Vector2.zero,newCount+1);
 			mAbove.uv.AddRange(collection);
+			mBelow.uv.AddRange(collection);
 
-		}
+	}
 
 		private static int[] TriangelsRecalculation(MeshInfo mAbove, int newCount){
 			List<int> newTriangles = new List<int>();
