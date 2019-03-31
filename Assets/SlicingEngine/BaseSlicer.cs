@@ -89,12 +89,14 @@ namespace Assets.Scripts.Slicer{
 		protected virtual void PostProcessing(MeshInfo mAbove, MeshInfo mBelow,int newCount,Quaternion rot){
 		}
 
-		private static MeshInfo AssembleMesh(List<Vector3> vertices, List<int> triangles, List<Vector3> normals, List<Vector2> uv){
+		private MeshInfo AssembleMesh(List<Vector3> vertices, List<int> triangles, List<Vector3> normals, List<Vector2> uv){
 			MeshInfo m = new MeshInfo();
 			m.vertices = vertices;
 			m.triangles = triangles;
 			m.normals = normals;
 			m.uv = uv;
+			m.subTriangles = _meshInfo.subTriangles;
+
 			return m;
 		}
 

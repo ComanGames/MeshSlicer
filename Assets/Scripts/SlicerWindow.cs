@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using Assets.Scripts.Slicer;
+using Assets.SlicingEngine;
 using UnityEditor;
 using UnityEngine;
 

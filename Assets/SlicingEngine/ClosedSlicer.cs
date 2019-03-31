@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -29,8 +28,8 @@ namespace Assets.Scripts.Slicer{
 			mBelow.vertices.AddRange(newVerticesBelow);
 			mBelow.vertices.Add(avrage);
 
-			mAbove.triangles.AddRange(newTrianglesAbove);
-			mBelow.triangles.AddRange(newTrianglesBelow);
+			mAbove.subTriangles.AddRange(newTrianglesAbove);
+			mBelow.subTriangles.AddRange(newTrianglesBelow);
 
 
 			Vector3 newNormalAbove = rot*Vector3.up;

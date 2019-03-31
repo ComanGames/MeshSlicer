@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Slicer;
+﻿using Assets.Scripts;
+using Assets.Scripts.Slicer;
 using UnityEngine;
 
 namespace Assets.SlicingEngine{
@@ -13,6 +14,7 @@ namespace Assets.SlicingEngine{
 			Slicer = slicer;
 			Pos = pos;
 			Rot = rot;
+
 		}
 
 		public void Execute()
