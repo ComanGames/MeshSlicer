@@ -274,33 +274,37 @@ PrefabInstance:
       propertyPath: m_Name
       value: apple
       objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: 8db774d63ffa4304fb8dddd6116ead54, type: 3}
+      propertyPath: m_Layer
+      value: 9
+      objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 8db774d63ffa4304fb8dddd6116ead54, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.54
+      value: -0.95
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 8db774d63ffa4304fb8dddd6116ead54, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 3.12
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 8db774d63ffa4304fb8dddd6116ead54, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 2.17
+      value: 2.67
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 8db774d63ffa4304fb8dddd6116ead54, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 1.7112914e-15
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 8db774d63ffa4304fb8dddd6116ead54, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 8db774d63ffa4304fb8dddd6116ead54, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.000000021855694
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 8db774d63ffa4304fb8dddd6116ead54, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.0000000754979
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 8db774d63ffa4304fb8dddd6116ead54, type: 3}
       propertyPath: m_RootOrder
@@ -331,6 +335,7 @@ GameObject:
   - component: {fileID: 1297041964}
   - component: {fileID: 1297041963}
   - component: {fileID: 1297041962}
+  - component: {fileID: 1297041965}
   m_Layer: 0
   m_Name: Katana
   m_TagString: Untagged
@@ -391,12 +396,31 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1297041961}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.4235, y: 1.06, z: 2.19}
-  m_LocalScale: {x: 0.55137, y: 0.55137, z: 0.55137}
+  m_LocalPosition: {x: 3.8, y: 3.03, z: 2.72}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1297041965
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1297041961}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d703e868af2c0b3409a47918f1965b48, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CollisionMask:
+    serializedVersion: 2
+    m_Bits: 512
+  RayOffset: {x: -2.81, y: -0.28, z: 0}
+  RayCounts: 18
+  RayLength: 1.2
+  Distance: 0.4
 --- !u!1 &1829715433
 GameObject:
   m_ObjectHideFlags: 0
@@ -507,8 +531,8 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 644985459}
   m_PrefabAsset: {fileID: 0}
---- !u!135 &2093118936
-SphereCollider:
+--- !u!64 &2093118936
+MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -517,9 +541,10 @@ SphereCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.37079924
-  m_Center: {x: 0.00000028312206, y: -0.000000014901161, z: 0.0000002682209}
+  serializedVersion: 3
+  m_Convex: 1
+  m_CookingOptions: 0
+  m_Mesh: {fileID: 4300000, guid: 8db774d63ffa4304fb8dddd6116ead54, type: 3}
 --- !u!54 &2093118937
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -548,3 +573,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e00fb86931d7d7742ad85b837ee626d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &2093118942
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2093118935}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f362fe3e3146094d8b24e61e34fbf29, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  InternalMaterial: {fileID: 2100000, guid: d5540f5ffa08c984491e89d2292fb079, type: 2}
+  ForceMultiplayer: 100

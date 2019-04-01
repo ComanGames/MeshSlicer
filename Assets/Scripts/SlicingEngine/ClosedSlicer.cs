@@ -44,9 +44,9 @@ namespace Assets.Scripts.Slicer{
 			mBelow.normals.AddRange(Enumerable.Repeat(newNormalBelow, newCount +1).ToArray());
 
 
-			IEnumerable<Vector2> collection = Enumerable.Repeat(Vector2.zero,newCount+1);
-			mAbove.uv.AddRange(collection);
-			mBelow.uv.AddRange(collection);
+//			IEnumerable<Vector2> collection = Enumerable.Repeat(Vector2.zero,newCount+1);
+//			mAbove.uv.AddRange(collection);
+//			mBelow.uv.AddRange(collection);
 
 	}
 

@@ -9,6 +9,7 @@ namespace Assets.Scripts{
 	public class SlicerWindow:EditorWindow{
 		public MeshFilter Renderer;
 		public Material InternalMaterial;
+		public SlicerType TypeOfSlicer = 0;
 		private Vector3 pos;
 		private Vector3 rot = new Vector3(180,180,180);
 		private long LastTimeLapse = 0;
@@ -21,11 +22,19 @@ namespace Assets.Scripts{
 		public void OnGUI(){
 			TitleText();
 			GetObject();
+			GetSlicerType();
 			GetPositionOfSlice();
 			GetRotationOfSlice();
 			GetMaterial();
 			DoSlice();
 			ShowData();
+		}
+
+		private void GetSlicerType(){
+			EditorGUILayout.BeginHorizontal();
+			EditorGUILayout.LabelField(" Type of slicer:", GUILayout.Width(100));
+			TypeOfSlicer = (SlicerType)EditorGUILayout.EnumPopup(TypeOfSlicer,GUILayout.Width(100));
+			EditorGUILayout.EndHorizontal();
 		}
 
 		private void GetMaterial(){
@@ -117,7 +126,7 @@ namespace Assets.Scripts{
 
 				Stopwatch stopwatch = Stopwatch.StartNew();
 
-				ISlicer slicer = new ClosedSlicer(new MeshInfo(Renderer.sharedMesh));
+				ISlicer slicer = GetSlicer(Renderer.sharedMesh);
 				GameObject[] objects=  controller.DoSlice(pos,Quaternion.Euler(rot),(ISlicer)slicer,InternalMaterial);
 				
 				Undo.DestroyObjectImmediate(controller.gameObject);
@@ -128,6 +137,20 @@ namespace Assets.Scripts{
 				LastTimeLapse = stopwatch.ElapsedMilliseconds;
 			}
 		}
+
+		private ISlicer GetSlicer(Mesh mesh){
+					MeshInfo info = new MeshInfo(mesh);
+			switch (TypeOfSlicer){
+				case SlicerType.Base:
+					return  new BaseSlicer(info);
+				case SlicerType.Close:
+					return  new ClosedSlicer(info);
+					
+			}
+			
+			return null;
+		}
+
 		private void OnInspectorUpdate(){
 
 

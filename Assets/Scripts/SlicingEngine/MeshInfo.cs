@@ -19,6 +19,7 @@ namespace Assets.Scripts.Slicer{
 		}
 
 		public MeshInfo(Mesh mesh){
+
 			vertices = mesh.vertices.ToList();
 			normals = mesh.normals.ToList();
 			uv = mesh.uv.ToList();
@@ -30,6 +31,7 @@ namespace Assets.Scripts.Slicer{
 		}
 
 		public Mesh GetMesh(){
+
 			Mesh mesh = new Mesh();
 			mesh.vertices = vertices.ToArray();
 			
@@ -37,6 +39,7 @@ namespace Assets.Scripts.Slicer{
 				mesh.normals = normals.ToArray();
 			if(uv.Count==mesh.vertices.Length)
 				mesh.uv = uv.ToArray();
+
 			mesh.name = name;
 
 			mesh.subMeshCount = triangles.Length;

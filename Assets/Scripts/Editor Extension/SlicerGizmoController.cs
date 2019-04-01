@@ -39,6 +39,7 @@ namespace Assets.Scripts{
 			MeshInfo[] meshes = slicer.Slice(pos,rot);
 			Mesh Above = meshes[0].GetMesh();
 			Mesh Below = meshes[1].GetMesh();
+				
 
 			MeshUtility.Optimize(Above);
 			MeshUtility.Optimize(Below);

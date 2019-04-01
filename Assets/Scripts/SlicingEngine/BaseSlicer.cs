@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Assets.Scripts.Slicer;
+using UnityEngine;
 using Quaternion = UnityEngine.Quaternion;
 using Vector3 = UnityEngine.Vector3;
 using Vector2 = UnityEngine.Vector2;
@@ -17,6 +18,7 @@ namespace Assets.SlicingEngine{
 
 		public MeshInfo[] Slice(Vector3 pos, Quaternion rot){
 
+			Debug.Log(_meshInfo.uv.Count);
 			//Sorting vertices
 			int[] sorted = SortVertices(_meshInfo.vertices, pos, rot);
 
@@ -64,6 +66,10 @@ namespace Assets.SlicingEngine{
 			MeshInfo mAbove = AssembleMesh(vAbove, tAbove, nAbove, uAbove,_meshInfo.name+" above");
 			MeshInfo mBelow = AssembleMesh(vBelow, tBelow, nBelow, uBelow,_meshInfo.name+" below");
 
+
+			Debug.Log(uBelow.Count);
+			Debug.Log(vBelow.Count);
+
 			PostProcessing(mAbove, mBelow,newVerticesCount,rot);
 			return new[]{mAbove,mBelow};
 		}
@@ -110,13 +116,11 @@ namespace Assets.SlicingEngine{
 				return;
 
 			for (int i = 0; i < sorted.Length; i++){
-				int j = (i + 1) * -1;
+
 				if (sorted[i] >= 0)
-					if(u.Count<i)
 						uAbove.Add(u[i]);
 				else{
-					if(u.Count<j)
-						uBelow.Add(u[j]);
+						uBelow.Add(u[i]);
 				}
 			}
 		}
