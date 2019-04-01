@@ -67,9 +67,6 @@ namespace Assets.SlicingEngine{
 			MeshInfo mBelow = AssembleMesh(vBelow, tBelow, nBelow, uBelow,_meshInfo.name+" below");
 
 
-			Debug.Log(uBelow.Count);
-			Debug.Log(vBelow.Count);
-
 			PostProcessing(mAbove, mBelow,newVerticesCount,rot);
 			return new[]{mAbove,mBelow};
 		}
