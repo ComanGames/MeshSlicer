@@ -8,6 +8,7 @@ using UnityEngine;
 namespace Assets.Scripts{
 	public class SlicerWindow:EditorWindow{
 		public MeshFilter Renderer;
+		public Material InternalMaterial;
 		private Vector3 pos;
 		private Vector3 rot = new Vector3(180,180,180);
 		private long LastTimeLapse = 0;
@@ -22,8 +23,21 @@ namespace Assets.Scripts{
 			GetObject();
 			GetPositionOfSlice();
 			GetRotationOfSlice();
+			GetMaterial();
 			DoSlice();
 			ShowData();
+		}
+
+		private void GetMaterial(){
+			EditorGUILayout.BeginHorizontal();
+			EditorGUILayout.LabelField(" Position:", GUILayout.Width(80));
+			InternalMaterial = (Material) EditorGUILayout.ObjectField(InternalMaterial, typeof(Material), true);
+			if (InternalMaterial == null){
+				InternalMaterial = AssetDatabase.GetBuiltinExtraResource<Material>("Default-Diffuse.mat");
+				InternalMaterial.color = Color.red;
+			}
+
+			EditorGUILayout.EndHorizontal();
 		}
 
 		private void ShowData(){
@@ -104,7 +118,7 @@ namespace Assets.Scripts{
 				Stopwatch stopwatch = Stopwatch.StartNew();
 
 				ISlicer slicer = new ClosedSlicer(new MeshInfo(Renderer.sharedMesh));
-				GameObject[] objects=  controller.DoSlice(pos,Quaternion.Euler(rot),(ISlicer)slicer);
+				GameObject[] objects=  controller.DoSlice(pos,Quaternion.Euler(rot),(ISlicer)slicer,InternalMaterial);
 				
 				Undo.DestroyObjectImmediate(controller.gameObject);
 				Undo.RegisterCreatedObjectUndo(objects[0], "Create object");
@@ -149,4 +163,5 @@ namespace Assets.Scripts{
 			return controller;
 		}
 	}
+
 }

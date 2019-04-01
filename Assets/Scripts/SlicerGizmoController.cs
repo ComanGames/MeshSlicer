@@ -23,11 +23,9 @@ namespace Assets.Scripts{
 				}
 
 			}
-
-
 		}
 
-		public GameObject[] DoSlice(Vector3 pos, Quaternion rot, ISlicer slicer){
+		public GameObject[] DoSlice(Vector3 pos, Quaternion rot, ISlicer slicer,Material mat){
 			MeshInfo[] meshes = slicer.Slice(pos,rot);
 			Mesh Above = meshes[0].GetMesh();
 			Mesh Below = meshes[1].GetMesh();
@@ -40,8 +38,23 @@ namespace Assets.Scripts{
 
 			cloneAbove.GetComponent<MeshFilter>().sharedMesh = Above;
 			cloneBelow.GetComponent<MeshFilter>().sharedMesh = Below;
+
+			MeshRenderer above  = cloneAbove.GetComponent<MeshRenderer>();
+			MeshRenderer below  = cloneBelow.GetComponent<MeshRenderer>();
+
+			Material[] original = gameObject.GetComponent<MeshRenderer>().sharedMaterials;
+			SetMaterials(above,original[0],mat);
+			SetMaterials(below,original[0],mat);
+
 			return new GameObject[]{cloneAbove,cloneBelow};
 
+		}
+
+		private static void SetMaterials(MeshRenderer target,Material original, Material interl){
+			Material[] multiple = new Material[2];
+			multiple[0] = original;
+			multiple[1] = interl;
+			target.sharedMaterials = multiple;
 		}
 	}
 }
