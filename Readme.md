@@ -4,13 +4,13 @@
 ![](https://media.giphy.com/media/69jCoAdaOCKohBfil1/giphy.gif)
 
 ## High performance 
-![](https://by3302files.storage.live.com/y4mggoLAlHJSQCfM9OlHEDpQmzAhcUsBuB-jNKLjlRvCv3HAw8uudDxb8M0pOoYIpDd8u3IsQPL-gIgtmagp0tjV8fDNcHgVbMic9mXoQjHb9zHMeOG5eStR7FnrVwli_JzXGzKaWI0KfkwTvajp7NOJEQ_8axYqSpcLorMO3-5JlFygN91j2jEvRWMST6Wy6ajYWPBC8tFvGpijm9RBKmxAQ/2019-04-01_23-43-04.png)
+![](https://af5piw.by.files.1drv.com/y4mDPPkE3At1coRNx0VPV7UYPJLxUWhv15xe_fc52au2upf737z8wsBsdacufCD9Uj6MexS4AXItWONwTgmesNHkB4I8iS2AsOYmQM2BerEVf16qahDbTThBBAhmo4rMh0RxVwhfXDXAZ-8uY5IQ43jMwH3oft6TaZXJKeQGRIbSYVOcFyiAQw3GNw99FQbAnovLjVzhWel8PxcM1dTW1c2ig?width=389&height=192&cropmode=none)
 
 ## Simple architecture
-![](https://by3302files.storage.live.com/y4moeIm-ltrpuqI2E7e7V1gE7K1x4OfyPejEzMQSo7QF0sIeWlHh4GrVAcqEdOUT9Jmi7NDAh7beivNriaqCNeYOBKQfOZL1asxL7aBGQUyewMWT858lkMBIpVzLlgig_IaamexIRN8MbyqZqxNHmGPgnY5zVf7clki1qK6aFHlESPr1yYpoVFp79OTE69plH1_RExpXte_3jF91_0if7NWRQ/EasyArchitecture.png)
+![](https://mnuarg.by.files.1drv.com/y4mEKmXCwkqSvPEWeovgSXffuxvsNE0v49UwEjoSyG_e6547gQaO5TfubomBa0wpqxmd4fnZQXntvVvNgRBUpehVnZM88QKf-jHKWsLmx9Bf_xS9CWOXr5q8v-qRVpVsuSOTKVxVPZmNsHXBYzqMvRX2fzj1EL5hypJHwSB0dnI-x9KtDoViDRk79qwZR5PO6ulyj3C5qV2RT78fzsQ71SeLg?width=237&height=342&cropmode=none)
 
 ## Based on mathematical theory
-![](https://by3302files.storage.live.com/y4mX0H6RBXpE5TfxpfTjf6-_mDiicEgsvtxL8OEHIW86apBVLGyswwacKokf3L1jPVZ302CkYUFuqHy5OW8HpdrXFpeiCavZM_q40lSTR_cLIbf2Mksl-4g1SQ8f9oP4VUbvgoAm2HkV0-kkir3aKNrHcsBylNOWHzdH3DMBOCj4DvMnMfOJAPcMwmiYrmW0M6qs7liK14qUsXgervIo1MUNA/2019-04-01_23-43-19.png)
+![](https://a9mqlg.by.files.1drv.com/y4mNC11XUKaJ16eW8FN1hZLvy_KoMWCHNDel9qYD3xpKRyvXylQynuFAkcyb_YQwu96MzHJ4zUei5CmcHEt3mN8eD6b_pkpDFxOFPv8-ObyAAI8Fhlfol2QiAk-vvk8C5b2GJUwg4lj9dT1kgpKuxKFW21N3OoEL6_hns4ihV--Bo6mxoQHogc_t6LvNcNNkS88RYRmP6yPUSiOcUwtkXEbgw?width=618&height=793&cropmode=none)
 
 ## Works with physics
 ![](https://media.giphy.com/media/1AgEWDPf8Oa2JW6WQe/giphy.gif)
