@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using Assets.Scripts.Slicer;
 using Quaternion = UnityEngine.Quaternion;
 using Vector3 = UnityEngine.Vector3;
 using Vector2 = UnityEngine.Vector2;
 
-namespace Assets.Scripts.Slicer{
+namespace Assets.SlicingEngine{
 	public class BaseSlicer:ISlicer{
 		private readonly MeshInfo _meshInfo;
 		private readonly Triangle[] _triangles ;
@@ -44,12 +45,12 @@ namespace Assets.Scripts.Slicer{
 
 				bool tUp = IsTriangleUp(tr,sorted);
 				if (tUp){
-					tAbove.AddRange(GetUpTriangles(newTrianglesUp, aboveCount));
-					tBelow.AddRange(GetDownTriangles(newTrianglesDown, belowCount));
+					tAbove[tr.SubMashId].AddRange(GetUpTriangles(newTrianglesUp, aboveCount));
+					tBelow[tr.SubMashId].AddRange(GetDownTriangles(newTrianglesDown, belowCount));
 				}
 				else{
-					tAbove.AddRange(GetDownTriangles(newTrianglesUp, aboveCount));
-					tBelow.AddRange(GetUpTriangles(newTrianglesDown, belowCount));
+					tAbove[tr.SubMashId].AddRange(GetDownTriangles(newTrianglesUp, aboveCount));
+					tBelow[tr.SubMashId].AddRange(GetUpTriangles(newTrianglesDown, belowCount));
 				}
 
 				nAbove.AddRange(newNormals);
@@ -60,8 +61,8 @@ namespace Assets.Scripts.Slicer{
 			}
 
 			//Mesh Above
-			MeshInfo mAbove = AssembleMesh(vAbove, tAbove, nAbove, uAbove);
-			MeshInfo mBelow = AssembleMesh(vBelow, tBelow, nBelow, uBelow);
+			MeshInfo mAbove = AssembleMesh(vAbove, tAbove, nAbove, uAbove,_meshInfo.name+" above");
+			MeshInfo mBelow = AssembleMesh(vBelow, tBelow, nBelow, uBelow,_meshInfo.name+" below");
 
 			PostProcessing(mAbove, mBelow,newVerticesCount,rot);
 			return new[]{mAbove,mBelow};
@@ -89,13 +90,15 @@ namespace Assets.Scripts.Slicer{
 		protected virtual void PostProcessing(MeshInfo mAbove, MeshInfo mBelow,int newCount,Quaternion rot){
 		}
 
-		private MeshInfo AssembleMesh(List<Vector3> vertices, List<int> triangles, List<Vector3> normals, List<Vector2> uv){
-			MeshInfo m = new MeshInfo();
-			m.vertices = vertices;
-			m.triangles = triangles;
-			m.normals = normals;
-			m.uv = uv;
-			m.subTriangles = _meshInfo.subTriangles;
+		private MeshInfo AssembleMesh(List<Vector3> vertices, List<int>[] triangles, List<Vector3> normals, List<Vector2> uv, string name)
+		{
+			MeshInfo m = new MeshInfo(
+				vertices,
+				triangles,
+				normals,
+				uv,
+				name
+				);
 
 			return m;
 		}
@@ -215,18 +218,28 @@ namespace Assets.Scripts.Slicer{
 			}
 		}
 
-		private void GetTrianglesBelowAhdAbove(int[] sorted, List<int> t, out List<int> tAbelow, out List<int> tBelow){
-			tAbelow = new List<int>();
-			tBelow = new List<int>();
-			for (int i = 0; i < t.Count/3; i++){
-				int a = sorted[t[(i * 3)]];
-				int b = sorted[t[(i * 3) + 1]];
-				int c = sorted[t[(i * 3) + 2]];
-				if(a>=0&&b>=0&&c>=0){
-					tAbelow.AddRange(new[]{a,b,c});
+		private void GetTrianglesBelowAhdAbove(int[] sorted, List<int>[] t, out List<int>[] tAbelow, out List<int>[] tBelow){
+
+			int count = t.Length;
+			tAbelow = new List<int>[count];
+			tBelow = new List<int>[count];
+			for (int i = 0; i < count; i++){
+				tAbelow[i] = new List<int>();
+				tBelow[i] = new List<int>();
+			}
+
+			for (int subMeshIndex = 0; subMeshIndex < count; subMeshIndex++){
+
+				for (int i = 0; i < t[subMeshIndex].Count/3; i++){
+					int a = sorted[t[subMeshIndex][(i * 3)]];
+					int b = sorted[t[subMeshIndex][(i * 3) + 1]];
+					int c = sorted[t[subMeshIndex][(i * 3) + 2]];
+					if(a>=0&&b>=0&&c>=0){
+						tAbelow[subMeshIndex].AddRange(new[]{a,b,c});
+					}
+					else if(a<0&&b<0&&c<0)
+						tBelow[subMeshIndex].AddRange(new[]{-a-1,-b-1,-c-1});
 				}
-				else if(a<0&&b<0&&c<0)
-					tBelow.AddRange(new[]{-a-1,-b-1,-c-1});
 			}
 		}
 

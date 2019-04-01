@@ -2,6 +2,8 @@
 
 namespace Assets.Scripts.Slicer{
 	public class Triangle:IEquatable<Triangle>{
+
+		public int SubMashId;
 		public int A;
 		public int B;
 		public int C;
@@ -10,7 +12,7 @@ namespace Assets.Scripts.Slicer{
 		public Edge EdgeBC;
 		public Edge EdgeAC;
 
-		public Triangle(int a, int b, int c){
+		public Triangle(int a, int b, int c,int mashId){
 			this.A = a;
 			this.B = b;
 			this.C = c;
@@ -18,6 +20,7 @@ namespace Assets.Scripts.Slicer{
 			EdgeAB = new Edge(A,B);
 			EdgeBC = new Edge(B,C);
 			EdgeAC = new Edge(A,C);
+			SubMashId = mashId;
 		}
 
 		public int[] GetVertices(){

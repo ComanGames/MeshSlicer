@@ -5,43 +5,46 @@ using UnityEngine;
 namespace Assets.Scripts.Slicer{
 	public class MeshInfo{
 		public List<Vector3> vertices;
-		public List<int> triangles;
-		public List<int> subTriangles;
+		public List<int>[] triangles;
 		public List<Vector3> normals;
 		public List<Vector2> uv;
 		public string name;
 
-		public MeshInfo(){
-			subTriangles = new List<int>();
+		public MeshInfo(List<Vector3> vertices, List<int>[] triangles, List<Vector3> normals, List<Vector2> uv, string name){
+			this.vertices = vertices;
+			this.triangles = triangles;
+			this.normals = normals;
+			this.uv = uv;
+			this.name = name;
 		}
 
 		public MeshInfo(Mesh mesh){
 			vertices = mesh.vertices.ToList();
-			triangles = mesh.triangles.ToList();
 			normals = mesh.normals.ToList();
 			uv = mesh.uv.ToList();
 			name = mesh.name;
-			subTriangles = new List<int>();
-			if(mesh.subMeshCount>1)
-					subTriangles.AddRange(mesh.GetTriangles(1));
+
+			triangles = new List<int>[mesh.subMeshCount];
+			for (int i = 0; i < triangles.Length; i++)
+				triangles[i] = mesh.GetTriangles(i).ToList();
 		}
 
 		public Mesh GetMesh(){
 			Mesh mesh = new Mesh();
 			mesh.vertices = vertices.ToArray();
-			mesh.triangles = triangles.ToArray();
+			
 			if(normals.Count>0)
 				mesh.normals = normals.ToArray();
 			if(uv.Count==mesh.vertices.Length)
 				mesh.uv = uv.ToArray();
 			mesh.name = name;
-			if (subTriangles.Count > 0){
-				mesh.subMeshCount = 2;
-				mesh.SetTriangles(subTriangles, 1);
+
+			mesh.subMeshCount = triangles.Length;
+			for (int i = 0; i < triangles.Length; i++){
+				mesh.SetTriangles(triangles[i].ToArray(),i);
 			}
 
 			return mesh;
-
 		}
 
 
