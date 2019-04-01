@@ -29,12 +29,16 @@ namespace Assets.Scripts.Slicer{
 			mBelow.vertices.AddRange(newVerticesBelow);
 			mBelow.vertices.Add(avrage);
 
-			mAbove.subTriangles.AddRange(newTrianglesAbove);
-			mBelow.subTriangles.AddRange(newTrianglesBelow);
+			mAbove.triangles = CheckSize(mAbove.triangles);
+			mBelow.triangles = CheckSize(mBelow.triangles);
 
 
-			Vector3 newNormalAbove = rot*Vector3.up;
-			Vector3 newNormalBelow = rot*Vector3.down;
+			mAbove.triangles[1].AddRange(newTrianglesAbove);
+			mBelow.triangles[1].AddRange(newTrianglesBelow);
+
+
+			Vector3 newNormalAbove = rot*Vector3.down;
+			Vector3 newNormalBelow = rot*Vector3.up;
 
 			mAbove.normals.AddRange(Enumerable.Repeat(newNormalAbove, newCount +1).ToArray());
 			mBelow.normals.AddRange(Enumerable.Repeat(newNormalBelow, newCount +1).ToArray());
@@ -46,32 +50,46 @@ namespace Assets.Scripts.Slicer{
 
 	}
 
-		private static int[] TriangelsRecalculation(MeshInfo mAbove, int newCount){
+		private List<int>[] CheckSize(List<int>[] toUpdate){
+			if (toUpdate.Length <= 1){
+				List<int> old = toUpdate[0];
+				toUpdate = new List<int>[2];
+				toUpdate[0] = old;
+				toUpdate[1] = new List<int>();
+
+			}
+
+			return toUpdate;
+		}
+
+		private static int[] TriangelsRecalculation(MeshInfo mash, int newCount){
 			List<int> newTriangles = new List<int>();
-			int shift = mAbove.vertices.Count;
-			int max = mAbove.vertices.Count + newCount;
+			int shift = mash.vertices.Count;
+			int max = mash.vertices.Count + newCount;
 
 			List<int> other= new List<int>();
-			for (int i = 0; i < mAbove.triangles.Count / 3; i++){
-				int index = mAbove.triangles.Count - (i * 3);
-				int A = mAbove.triangles[index - 1];
-				int B = mAbove.triangles[index - 2];
-				int C = mAbove.triangles[index - 3];
-				int[] temp = new int[]{A, B, C};
+			for (int j = 0; j < mash.triangles.Length; j++){
+				for (int i = 0; i < mash.triangles[j].Count / 3; i++){
+					int index = mash.triangles[j].Count - (i * 3);
+					int A = mash.triangles[j][index - 1];
+					int B = mash.triangles[j][index - 2];
+					int C = mash.triangles[j][index - 3];
+					int[] temp = new int[]{A, B, C};
 
-				int m = 0;
-				foreach (int i1 in temp){
-					if (i1 < shift - newCount){
-						m++;
-					}
-				}
-
-				if (m == 1){
+					int m = 0;
 					foreach (int i1 in temp){
-						if (i1 < shift - newCount)
-							newTriangles.Add(max);
-						else
-							newTriangles.Add(i1 + newCount);
+						if (i1 < shift - newCount){
+							m++;
+						}
+					}
+
+					if (m == 1){
+						foreach (int i1 in temp){
+							if (i1 < shift - newCount)
+								newTriangles.Add(max);
+							else
+								newTriangles.Add(i1 + newCount);
+						}
 					}
 				}
 			}

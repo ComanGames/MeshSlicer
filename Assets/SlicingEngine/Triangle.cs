@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Assets.Scripts.Slicer{
 	public class Triangle:IEquatable<Triangle>{
@@ -27,14 +28,16 @@ namespace Assets.Scripts.Slicer{
 			return new[]{A, B, C};
 		}
 		public static Triangle[] GetTriangles(MeshInfo m){
-			Triangle[] triangles = new Triangle[m.triangles.Count / 3];
-			for (int i = 0; i < triangles.Length; i++){
-				int a = m.triangles[(i * 3)];
-				int b = m.triangles[(i * 3) + 1];
-				int c = m.triangles[(i * 3) + 2];
-				triangles[i] = new Triangle(a, b, c);
-			}
-			return triangles;
+		List<Triangle> triangles = new List<Triangle>();
+			for (int j = 0; j < m.triangles.Length; j++){
+					for (int i = 0; i < m.triangles[j].Count/3; i++){
+						int a = m.triangles[j][(i * 3)];
+						int b = m.triangles[j][(i * 3) + 1];
+						int c = m.triangles[j][(i * 3) + 2];
+						triangles.Add( new Triangle(a, b, c,j));
+					}
+				}
+			return triangles.ToArray();
 		}
 		public Edge[] GetEdges(){
 			return new[]{EdgeAB,EdgeBC,EdgeAC};
